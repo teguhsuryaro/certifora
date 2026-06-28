@@ -54,21 +54,21 @@ export async function registerParticipant(
   // 1. Upload selfie
   const selfiePath = await uploadSelfie(eventId, selfieFile)
 
-  // 2. Generate kode unik
+  // 2. Generate kode unik & ID
   const certificateCode = await generateUniqueCode(eventPrefix)
+  const participantId = crypto.randomUUID()
 
-  // 3. Insert participant
-  const { data: participant, error: participantError } = await supabase
+  // 3. Insert participant (tanpa .select() untuk menghindari RLS read policy error)
+  const { error: participantError } = await supabase
     .from('participants')
     .insert({
+      id: participantId,
       event_id: eventId,
       full_name: fullName,
       email: email,
       selfie_path: selfiePath,
       certificate_code: certificateCode,
     })
-    .select()
-    .single()
 
   if (participantError) throw participantError
 
@@ -77,11 +77,20 @@ export async function registerParticipant(
     .from('certificate_codes')
     .insert({
       code: certificateCode,
-      participant_id: participant.id,
+      participant_id: participantId,
       event_id: eventId,
     })
 
   if (codeError) throw codeError
+
+  // 5. Fetch full participant data
+  const { data: participant, error: fetchError } = await supabase
+    .from('participants')
+    .select('*')
+    .eq('id', participantId)
+    .single()
+
+  if (fetchError) throw fetchError
 
   return participant
 }

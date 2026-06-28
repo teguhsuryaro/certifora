@@ -146,6 +146,7 @@ export interface CertificateTemplateInsert {
 }
 
 export interface ParticipantInsert {
+  id?: string
   event_id: string
   full_name: string
   email: string
