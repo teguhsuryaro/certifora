@@ -31,3 +31,7 @@ yarn-error.log*
 
 # Supabase (jika nanti setup CLI lokal)
 supabase/.temp/
+
+# Planning
+production/
+spesifikasi.md
