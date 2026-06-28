@@ -1,3 +1,146 @@
+import { useEffect, useState } from 'react'
+import { Link } from 'react-router-dom'
+import { useEventStore } from '../../stores/eventStore'
+import { Button, StatusBadge, EmptyState, PageLoading } from '../../components/ui'
+import type { EventStatus } from '../../types/database'
+
+// Helper: mapping status ke badge
+function getStatusBadge(status: EventStatus) {
+  const map: Record<EventStatus, { variant: 'success' | 'warning' | 'danger' | 'neutral'; label: string }> = {
+    draft: { variant: 'warning', label: 'Draft' },
+    active: { variant: 'success', label: 'Aktif' },
+    temporarily_closed: { variant: 'neutral', label: 'Ditutup Sementara' },
+    permanently_closed: { variant: 'danger', label: 'Ditutup Permanen' },
+  }
+  return map[status]
+}
+
+// Filter options
+const STATUS_FILTERS: { value: string; label: string }[] = [
+  { value: 'all', label: 'Semua' },
+  { value: 'draft', label: 'Draft' },
+  { value: 'active', label: 'Aktif' },
+  { value: 'temporarily_closed', label: 'Ditutup Sementara' },
+  { value: 'permanently_closed', label: 'Ditutup Permanen' },
+]
+
 export default function DashboardPage() {
-  return <div>Admin Dashboard — akan dibuat di folder 05</div>
+  const { events, isLoading, fetchEvents } = useEventStore()
+  const [statusFilter, setStatusFilter] = useState('all')
+
+  useEffect(() => {
+    fetchEvents()
+  }, [fetchEvents])
+
+  const filteredEvents = statusFilter === 'all'
+    ? events
+    : events.filter((e) => e.status === statusFilter)
+
+  if (isLoading && events.length === 0) {
+    return <PageLoading />
+  }
+
+  return (
+    <div>
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-neutral-900">Dashboard</h1>
+          <p className="text-neutral-500 mt-1">Kelola semua event sertifikat Anda</p>
+        </div>
+        <Link to="/admin/events/new">
+          <Button variant="primary" icon={<span>＋</span>}>
+            Buat Event Baru
+          </Button>
+        </Link>
+      </div>
+
+      {/* Status Filter Tabs */}
+      <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
+        {STATUS_FILTERS.map((filter) => (
+          <button
+            key={filter.value}
+            onClick={() => setStatusFilter(filter.value)}
+            className={`
+              px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors
+              ${statusFilter === filter.value
+                ? 'bg-primary-600 text-white'
+                : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
+              }
+            `}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Event Grid */}
+      {filteredEvents.length === 0 ? (
+        <EmptyState
+          icon="📋"
+          title="Belum ada event"
+          description={statusFilter === 'all'
+            ? 'Mulai dengan membuat event pertama Anda'
+            : `Tidak ada event dengan status "${STATUS_FILTERS.find(f => f.value === statusFilter)?.label}"`
+          }
+          action={
+            statusFilter === 'all' ? (
+              <Link to="/admin/events/new">
+                <Button>Buat Event Pertama</Button>
+              </Link>
+            ) : undefined
+          }
+        />
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+          {filteredEvents.map((event) => {
+            const badge = getStatusBadge(event.status)
+            const participantCount = event.participants?.[0]?.count || 0
+
+            return (
+              <Link
+                key={event.id}
+                to={`/admin/events/${event.id}`}
+                className="block bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-card hover:border-neutral-300 transition-all group"
+              >
+                {/* Event Name + Status */}
+                <div className="flex items-start justify-between gap-3 mb-3">
+                  <h3 className="font-semibold text-neutral-900 group-hover:text-primary-600 transition-colors line-clamp-2">
+                    {event.name}
+                  </h3>
+                  <StatusBadge variant={badge.variant}>
+                    {badge.label}
+                  </StatusBadge>
+                </div>
+
+                {/* Event Info */}
+                <div className="space-y-1.5 text-sm text-neutral-500">
+                  <p>📅 {new Date(event.event_date).toLocaleDateString('id-ID', {
+                    day: 'numeric', month: 'long', year: 'numeric'
+                  })}</p>
+                  <p>🏢 {event.organizer}</p>
+                  <p>👥 {participantCount} peserta</p>
+                </div>
+
+                {/* Aksi Cepat */}
+                <div className="mt-4 flex gap-2">
+                  <span className="text-xs text-primary-600 font-medium">
+                    Kelola →
+                  </span>
+                </div>
+              </Link>
+            )
+          })}
+        </div>
+      )}
+
+      {/* Mobile FAB (Floating Action Button) */}
+      <Link
+        to="/admin/events/new"
+        className="fixed bottom-6 right-6 w-14 h-14 bg-primary-600 text-white rounded-full shadow-lg flex items-center justify-center text-2xl hover:bg-primary-700 transition-colors sm:hidden z-20"
+      >
+        ＋
+      </Link>
+    </div>
+  )
 }
