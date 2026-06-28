@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as participantService from '../../services/participantService'
+import * as emailService from '../../services/emailService'
+import * as templateService from '../../services/templateService'
 import { supabase } from '../../lib/supabase'
-import { Button, StatusBadge, EmptyState, PageLoading, Input } from '../../components/ui'
+import { Button, StatusBadge, EmptyState, PageLoading, Input, ConfirmModal } from '../../components/ui'
+import { SendProgressModal } from '../../components/shared/SendProgressModal'
 import type { DeliveryStatus } from '../../types/database'
 
 function getDeliveryBadge(status: DeliveryStatus) {
@@ -27,6 +30,13 @@ export default function ParticipantsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+
+  const [confirmSendAll, setConfirmSendAll] = useState(false)
+  const [isSending, setIsSending] = useState(false)
+  const [sendProgress, setSendProgress] = useState({
+    total: 0, sent: 0, failed: 0, skipped: 0,
+    currentName: '', isComplete: false, dailyLimitReached: false,
+  })
 
   useEffect(() => {
     if (eventId) loadParticipants()
@@ -58,6 +68,40 @@ export default function ParticipantsPage() {
   const successCount = participants.filter(p => p.delivery_status === 'success').length
   const failedCount = participants.filter(p => p.delivery_status === 'failed').length
 
+  const handleSendAll = async () => {
+    setConfirmSendAll(false)
+    setIsSending(true)
+    setSendProgress({
+      total: pendingCount, sent: 0, failed: 0, skipped: 0,
+      currentName: '', isComplete: false, dailyLimitReached: false,
+    })
+
+    try {
+      const [template, { data: eventData }] = await Promise.all([
+        templateService.fetchTemplateByEventId(eventId!),
+        supabase.from('events').select('name, organizer, event_email_settings(*)').eq('id', eventId).single()
+      ])
+
+      const emailSettings = eventData?.event_email_settings?.[0]
+      const pendingParticipants = participants.filter(p => p.delivery_status !== 'success')
+
+      if (!emailSettings) throw new Error('Email settings not found')
+
+      await emailService.sendAllCertificates(
+        pendingParticipants,
+        template,
+        emailSettings,
+        eventData.name,
+        eventData.organizer,
+        (progress) => setSendProgress(progress)
+      )
+
+      await loadParticipants()
+    } catch (error) {
+      console.error('Batch send error:', error)
+    }
+  }
+
   // Get selfie URL
   const getSelfieUrl = (selfiePath: string | null) => {
     if (!selfiePath) return null
@@ -77,15 +121,15 @@ export default function ParticipantsPage() {
             {participants.length} peserta • {successCount} terkirim • {pendingCount} belum • {failedCount} gagal
           </p>
         </div>
-        <Link to={`/admin/events/${eventId}/participants`}>
-          {/* Tombol Kirim Semua - implementasi di folder 10 */}
+        <div>
           <Button
             variant="primary"
             disabled={pendingCount === 0}
+            onClick={() => setConfirmSendAll(true)}
           >
             Kirim Semua ({pendingCount})
           </Button>
-        </Link>
+        </div>
       </div>
 
       {/* Search & Filter */}
@@ -227,6 +271,25 @@ export default function ParticipantsPage() {
           </div>
         </>
       )}
+
+      {/* Modals */}
+      <ConfirmModal
+        isOpen={confirmSendAll}
+        onClose={() => setConfirmSendAll(false)}
+        onConfirm={handleSendAll}
+        title="Kirim Semua Sertifikat"
+        message={`Akan mengirim sertifikat ke ${pendingCount} peserta yang belum terkirim. Estimasi waktu: ~${Math.ceil((pendingCount * 2) / 60)} menit.`}
+        confirmText="Mulai Kirim"
+      />
+
+      <SendProgressModal
+        isOpen={isSending}
+        onClose={() => {
+          setIsSending(false)
+          loadParticipants()
+        }}
+        progress={sendProgress}
+      />
     </div>
   )
 }

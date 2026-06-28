@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as participantService from '../../services/participantService'
 import * as templateService from '../../services/templateService'
+import * as emailService from '../../services/emailService'
 import { supabase } from '../../lib/supabase'
 import { Button, StatusBadge, Modal, Input, PageLoading } from '../../components/ui'
 import type { DeliveryStatus } from '../../types/database'
@@ -21,6 +22,10 @@ export default function ParticipantDetailPage() {
     name_font_size: null as number | null,
   })
   const [isSavingOverride, setIsSavingOverride] = useState(false)
+
+  // Send state
+  const [isSendingEmail, setIsSendingEmail] = useState(false)
+  const [sendMessage, setSendMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
 
   useEffect(() => {
     if (participantId && eventId) {
@@ -83,6 +88,51 @@ export default function ParticipantDetailPage() {
     }
   }
 
+  // Send certificate
+  const handleSendCertificate = async () => {
+    if (!participant || !template || !eventId) return
+    setIsSendingEmail(true)
+    setSendMessage(null)
+
+    try {
+      const { data: emailSettings } = await supabase
+        .from('event_email_settings')
+        .select('*')
+        .eq('event_id', eventId)
+        .single()
+
+      const { data: eventData } = await supabase
+        .from('events')
+        .select('name, organizer')
+        .eq('id', eventId)
+        .single()
+
+      if (!emailSettings || !eventData) {
+        throw new Error('Data event atau pengaturan email tidak ditemukan')
+      }
+
+      const result = await emailService.sendCertificateToParticipant(
+        participant,
+        template,
+        emailSettings,
+        eventData.name,
+        eventData.organizer,
+        participant.template_overrides?.[0]
+      )
+
+      if (result.success) {
+        setSendMessage({ type: 'success', text: 'Sertifikat berhasil dikirim!' })
+        await loadData() // Refresh status logs
+      } else {
+        setSendMessage({ type: 'error', text: result.error || 'Gagal mengirim sertifikat' })
+      }
+    } catch (error: any) {
+      setSendMessage({ type: 'error', text: error.message })
+    } finally {
+      setIsSendingEmail(false)
+    }
+  }
+
   if (isLoading || !participant) return <PageLoading />
 
   const deliveryBadge = {
@@ -138,12 +188,19 @@ export default function ParticipantDetailPage() {
             </div>
           </dl>
 
-          {/* Kirim / Kirim Ulang — implementasi lengkap di folder 10 */}
+          {/* Kirim / Kirim Ulang */}
           <div className="mt-6 pt-4 border-t border-neutral-100">
+            {sendMessage && (
+              <div className={`p-3 rounded-lg mb-3 text-sm ${sendMessage.type === 'success' ? 'bg-success-50 text-success-700' : 'bg-danger-50 text-danger-700'}`}>
+                {sendMessage.text}
+              </div>
+            )}
             <Button
               variant={participant.delivery_status === 'failed' ? 'danger' : 'primary'}
               className="w-full"
               disabled={participant.delivery_status === 'success'}
+              isLoading={isSendingEmail}
+              onClick={handleSendCertificate}
             >
               {participant.delivery_status === 'success'
                 ? 'Sudah Terkirim'
