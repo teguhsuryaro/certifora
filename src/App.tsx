@@ -1,23 +1,26 @@
 import { useEffect } from 'react'
-import { supabase } from './lib/supabase'
+import { useAuthStore } from './stores/authStore'
 
 function App() {
-  useEffect(() => {
-    const testConnection = async () => {
-      const { data, error } = await supabase.from('events').select('*').limit(1)
-      if (error) {
-        console.log('Supabase connected, but table may not exist yet:', error.message)
-      } else {
-        console.log('Supabase connected successfully:', data)
-      }
-    }
-    testConnection()
-  }, [])
+  const { initialize, isLoading } = useAuthStore()
 
+  useEffect(() => {
+    initialize()
+  }, [initialize])
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600" />
+      </div>
+    )
+  }
+
+  // Router akan ditambahkan di file 02_routing.md
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
       <h1 className="text-3xl font-bold text-indigo-600">
-        Certifora — Coming Soon
+        Certifora
       </h1>
     </div>
   )

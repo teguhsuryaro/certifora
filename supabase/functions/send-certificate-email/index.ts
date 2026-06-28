@@ -18,7 +18,7 @@ interface EmailRequest {
   organizer: string
 }
 
-serve(async (req) => {
+serve(async (req: Request) => {
   // Handle CORS preflight
   if (req.method === 'OPTIONS') {
     return new Response('ok', {
@@ -179,7 +179,7 @@ serve(async (req) => {
   } catch (error) {
     return new Response(JSON.stringify({ 
       error: 'Internal server error', 
-      message: error.message 
+      message: (error as Error).message 
     }), {
       status: 500,
       headers: { 
