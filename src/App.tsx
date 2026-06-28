@@ -4,6 +4,8 @@ import { useAuthStore } from './stores/authStore'
 import { ProtectedRoute } from './components/layout/ProtectedRoute'
 import { PublicOnlyRoute } from './components/layout/PublicOnlyRoute'
 
+import { AdminLayout } from './components/layout/AdminLayout'
+
 // Public Pages
 import LandingPage from './pages/public/LandingPage'
 import LoginPage from './pages/public/LoginPage'
@@ -52,13 +54,15 @@ function App() {
 
         {/* ====== Admin Routes (protected) ====== */}
         <Route element={<ProtectedRoute />}>
-          <Route path="/admin/dashboard" element={<DashboardPage />} />
-          <Route path="/admin/events/new" element={<CreateEventPage />} />
-          <Route path="/admin/events/:eventId" element={<EventDetailPage />} />
-          <Route path="/admin/events/:eventId/template" element={<TemplateEditorPage />} />
-          <Route path="/admin/events/:eventId/participants" element={<ParticipantsPage />} />
-          <Route path="/admin/events/:eventId/participants/:participantId" element={<ParticipantDetailPage />} />
-          <Route path="/admin/events/:eventId/export" element={<ExportPage />} />
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<DashboardPage />} />
+            <Route path="/admin/events/new" element={<CreateEventPage />} />
+            <Route path="/admin/events/:eventId" element={<EventDetailPage />} />
+            <Route path="/admin/events/:eventId/template" element={<TemplateEditorPage />} />
+            <Route path="/admin/events/:eventId/participants" element={<ParticipantsPage />} />
+            <Route path="/admin/events/:eventId/participants/:participantId" element={<ParticipantDetailPage />} />
+            <Route path="/admin/events/:eventId/export" element={<ExportPage />} />
+          </Route>
         </Route>
 
         {/* ====== 404 ====== */}
