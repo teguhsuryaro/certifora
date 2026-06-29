@@ -145,14 +145,22 @@ export default function ParticipantsPage() {
     abortControllerRef.current = new AbortController()
 
     try {
-      const [template, { data: eventData }] = await Promise.all([
-        templateService.fetchTemplateByEventId(eventId!),
-        supabase.from('events').select('name, organizer, event_email_settings(*)').eq('id', eventId).single()
-      ])
+      const template = await templateService.fetchTemplateByEventId(eventId!)
+      const { data: eventData, error: eventError } = await supabase
+        .from('events')
+        .select('name, organizer')
+        .eq('id', eventId)
+        .single()
+        
+      const { data: emailSettings, error: emailError } = await supabase
+        .from('event_email_settings')
+        .select('*')
+        .eq('event_id', eventId)
+        .single()
 
-      const emailSettings = eventData?.event_email_settings?.[0]
-
-      if (!emailSettings) throw new Error('Email settings not found')
+      if (eventError || emailError || !emailSettings || !eventData) {
+        throw new Error('Data event atau pengaturan email tidak ditemukan')
+      }
 
       await emailService.sendAllCertificates(
         selectedParticipants,
@@ -165,8 +173,10 @@ export default function ParticipantsPage() {
       )
 
       await loadParticipants()
-    } catch (error) {
+    } catch (error: any) {
       console.error('Batch send error:', error)
+      alert(`Gagal memulai pengiriman massal: ${error.message || 'Terjadi kesalahan'}`)
+      setIsSending(false)
     } finally {
       abortControllerRef.current = null
     }
