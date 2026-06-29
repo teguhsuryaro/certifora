@@ -60,7 +60,7 @@ export default function ExportPage() {
       <h1 className="text-2xl font-bold text-neutral-900 mb-6">Export Data Peserta</h1>
 
       {/* Summary Card */}
-      <div className="bg-white rounded-xl border border-neutral-200 p-6 mb-6">
+      <div className="glass-card p-4 sm:p-6 mb-6">
         <h2 className="font-semibold text-neutral-900 mb-4">Ringkasan</h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div className="text-center p-3 bg-neutral-50 rounded-lg">
@@ -84,7 +84,7 @@ export default function ExportPage() {
 
       {/* Export Options */}
       <div className="space-y-4">
-        <div className="bg-white rounded-xl border border-neutral-200 p-6 flex items-center justify-between">
+        <div className="glass-card p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 className="font-semibold text-neutral-900">Export Excel (.xlsx)</h3>
             <p className="text-sm text-neutral-500 mt-1">
@@ -101,7 +101,7 @@ export default function ExportPage() {
           </Button>
         </div>
 
-        <div className="bg-white rounded-xl border border-neutral-200 p-6 flex items-center justify-between">
+        <div className="glass-card p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
             <h3 className="font-semibold text-neutral-900">Export PDF</h3>
             <p className="text-sm text-neutral-500 mt-1">

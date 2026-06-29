@@ -142,7 +142,7 @@ export default function EventDetailPage() {
           <div className="grid gap-4 sm:grid-cols-3">
             <Link
               to={`/admin/events/${eventId}/template`}
-              className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-card hover:border-primary-300 transition-all"
+              className="glass-card p-4 sm:p-5 hover:shadow-card hover:border-primary-300 transition-all text-center sm:text-left flex flex-col items-center sm:items-start"
             >
               <Palette size={24} className="mb-2 text-primary-600" />
               <h3 className="font-semibold text-neutral-900">Template Sertifikat</h3>
@@ -151,7 +151,7 @@ export default function EventDetailPage() {
 
             <Link
               to={`/admin/events/${eventId}/participants`}
-              className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-card hover:border-primary-300 transition-all"
+              className="glass-card p-4 sm:p-5 hover:shadow-card hover:border-primary-300 transition-all text-center sm:text-left flex flex-col items-center sm:items-start"
             >
               <Users size={24} className="mb-2 text-primary-600" />
               <h3 className="font-semibold text-neutral-900">Peserta</h3>
@@ -160,7 +160,7 @@ export default function EventDetailPage() {
 
             <Link
               to={`/admin/events/${eventId}/export`}
-              className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-card hover:border-primary-300 transition-all"
+              className="glass-card p-4 sm:p-5 hover:shadow-card hover:border-primary-300 transition-all text-center sm:text-left flex flex-col items-center sm:items-start"
             >
               <span className="text-2xl mb-2 block">📥</span>
               <h3 className="font-semibold text-neutral-900">Export Data</h3>
@@ -169,7 +169,7 @@ export default function EventDetailPage() {
           </div>
 
           {/* Event Details Card */}
-          <div className="bg-white rounded-xl border border-neutral-200 p-6">
+          <div className="glass-card p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-neutral-900 mb-4">Detail Event</h2>
             <dl className="space-y-3">
               {event.description && (
@@ -194,7 +194,7 @@ export default function EventDetailPage() {
 
         {/* Right Column — QR Code */}
         <div className="space-y-6">
-          <div className="bg-white rounded-xl border border-neutral-200 p-6 text-center">
+          <div className="glass-card p-4 sm:p-6 text-center">
             <h2 className="text-lg font-semibold text-neutral-900 mb-4">QR Code Registrasi</h2>
 
             {event.status === 'active' ? (

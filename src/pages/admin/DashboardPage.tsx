@@ -61,36 +61,36 @@ export default function DashboardPage() {
 
       {/* Quota Card */}
       {quota && (
-        <div className="mb-6 grid gap-4 sm:grid-cols-2">
-          <div className="bg-white rounded-xl border border-neutral-200 p-4 flex items-center justify-between">
+        <div className="mb-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-4 lg:gap-6">
+          <div className="glass-card p-4 sm:p-6 flex flex-col justify-between">
             <div>
               <p className="text-sm font-medium text-neutral-500 mb-1">Kuota Harian</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-bold text-neutral-900">{quota.dailySent}</span>
+              <div className="flex items-baseline gap-1 mb-3">
+                <span className="text-3xl font-bold text-neutral-900">{quota.dailySent}</span>
                 <span className="text-sm text-neutral-500">/ {quota.dailyLimit}</span>
               </div>
             </div>
-            <div className="w-24">
+            <div className="w-full">
               <div className="h-2 w-full bg-neutral-100 rounded-full overflow-hidden">
                 <div 
-                  className={`h-full rounded-full ${quota.dailySent / quota.dailyLimit > 0.9 ? 'bg-danger-500' : quota.dailySent / quota.dailyLimit > 0.7 ? 'bg-warning-500' : 'bg-success-500'}`}
+                  className={`h-full rounded-full transition-all duration-500 ${quota.dailySent / quota.dailyLimit > 0.9 ? 'bg-danger-500' : quota.dailySent / quota.dailyLimit > 0.7 ? 'bg-warning-500' : 'bg-primary-500'}`}
                   style={{ width: `${Math.min(100, (quota.dailySent / quota.dailyLimit) * 100)}%` }}
                 />
               </div>
             </div>
           </div>
-          <div className="bg-white rounded-xl border border-neutral-200 p-4 flex items-center justify-between">
+          <div className="glass-card p-4 sm:p-6 flex flex-col justify-between">
             <div>
               <p className="text-sm font-medium text-neutral-500 mb-1">Kuota Bulanan</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl font-bold text-neutral-900">{quota.monthlySent}</span>
+              <div className="flex items-baseline gap-1 mb-3">
+                <span className="text-3xl font-bold text-neutral-900">{quota.monthlySent}</span>
                 <span className="text-sm text-neutral-500">/ {quota.monthlyLimit}</span>
               </div>
             </div>
-            <div className="w-24">
+            <div className="w-full">
               <div className="h-2 w-full bg-neutral-100 rounded-full overflow-hidden">
                 <div 
-                  className={`h-full rounded-full ${quota.monthlySent / quota.monthlyLimit > 0.9 ? 'bg-danger-500' : quota.monthlySent / quota.monthlyLimit > 0.7 ? 'bg-warning-500' : 'bg-success-500'}`}
+                  className={`h-full rounded-full transition-all duration-500 ${quota.monthlySent / quota.monthlyLimit > 0.9 ? 'bg-danger-500' : quota.monthlySent / quota.monthlyLimit > 0.7 ? 'bg-warning-500' : 'bg-primary-500'}`}
                   style={{ width: `${Math.min(100, (quota.monthlySent / quota.monthlyLimit) * 100)}%` }}
                 />
               </div>
@@ -136,7 +136,7 @@ export default function DashboardPage() {
           }
         />
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredEvents.map((event) => {
             const badge = getStatusBadge(event.status)
             const participantCount = event.participants?.[0]?.count || 0
@@ -145,7 +145,7 @@ export default function DashboardPage() {
               <Link
                 key={event.id}
                 to={`/admin/events/${event.id}`}
-                className="block bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-card hover:border-neutral-300 transition-all group"
+                className="block glass-card p-4 sm:p-5 hover:shadow-card hover:border-primary-300 transition-all group"
               >
                 {/* Event Name + Status */}
                 <div className="flex items-start justify-between gap-3 mb-3">

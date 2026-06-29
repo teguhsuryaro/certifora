@@ -195,8 +195,8 @@ export default function ParticipantsPage() {
       ) : (
         <>
           {/* Desktop Table */}
-          <div className="hidden md:block bg-white rounded-xl border border-neutral-200 overflow-hidden">
-            <div className="overflow-x-auto">
+          <div className="hidden md:block glass-card overflow-hidden">
+            <div className="overflow-x-auto -mx-4 sm:mx-0">
               <table className="w-full">
                 <thead className="bg-neutral-50 border-b border-neutral-200 sticky top-0">
                   <tr>
@@ -263,7 +263,7 @@ export default function ParticipantsPage() {
                 <Link
                   key={p.id}
                   to={`/admin/events/${eventId}/participants/${p.id}`}
-                  className="block bg-white rounded-xl border border-neutral-200 p-4 hover:shadow-card transition-all"
+                  className="block glass-card p-4 hover:shadow-card transition-all"
                 >
                   <div className="flex items-start gap-3">
                     {/* Avatar */}

@@ -177,7 +177,7 @@ export default function TemplateEditorPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* === Kanvas Preview (70%) === */}
         <div className="lg:w-[70%]">
-          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+          <div className="glass-card p-4 sm:p-6">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Pratinjau Sertifikat</h2>
             
             {!template?.template_file_path ? (
@@ -276,7 +276,7 @@ export default function TemplateEditorPage() {
 
         {/* === Panel Kontrol (30%) === */}
         <div className="lg:w-[30%]">
-          <div className="bg-white rounded-xl border border-neutral-200 p-6 lg:sticky lg:top-24 space-y-6">
+          <div className="glass-card p-4 sm:p-6 lg:sticky lg:top-24 space-y-6">
             <h2 className="font-semibold text-neutral-900">Pengaturan</h2>
 
             {!template?.template_file_path && (
