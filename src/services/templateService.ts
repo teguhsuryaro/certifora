@@ -19,9 +19,6 @@ export async function uploadTemplatePdf(eventId: string, file: File): Promise<st
     .update({
       template_file_path: filePath,
       template_file_name: file.name,
-      // Reset posisi saat template diganti
-      name_position_x: 50.0,
-      name_position_y: 50.0,
     })
     .eq('event_id', eventId)
 

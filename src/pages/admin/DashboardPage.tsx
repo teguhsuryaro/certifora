@@ -182,7 +182,7 @@ export default function DashboardPage() {
                         <div className="bg-amber-50 border-l-4 border-amber-400 p-2 text-xs text-amber-800 rounded-r-md">
                           <div className="flex items-start gap-1.5">
                             <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
-                            <span>Template belum diatur.</span>
+                            <span>File PDF template belum diunggah.</span>
                           </div>
                         </div>
                       )}

@@ -162,7 +162,7 @@ export default function EventDetailPage() {
         <div className="mb-8 glass-card border-l-4 border-l-amber-500 p-4 shadow-sm flex items-start gap-3">
           <AlertTriangle size={24} className="text-amber-500 shrink-0" />
           <div>
-            <h3 className="font-semibold text-neutral-900 text-sm">Template sertifikat belum diatur</h3>
+            <h3 className="font-semibold text-neutral-900 text-sm">File PDF template belum diunggah</h3>
             <p className="text-sm text-neutral-600 mt-1">
               Sertifikat tidak dapat dikirim sebelum Anda mengunggah template PDF. 
               <Link to={`/admin/events/${eventId}/template`} className="font-bold text-amber-600 hover:text-amber-700 underline ml-1 transition-colors">
@@ -335,7 +335,7 @@ export default function EventDetailPage() {
                   
                   {(!isTemplateReady || participantCount === 0) && (
                     <p className="text-xs text-danger-600 mt-2">
-                      {!isTemplateReady ? '* Template belum diatur. ' : ''}
+                      {!isTemplateReady ? '* File PDF template belum diunggah. ' : ''}
                       {participantCount === 0 ? '* Belum ada peserta terdaftar.' : ''}
                     </p>
                   )}
