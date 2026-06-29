@@ -158,17 +158,21 @@ export async function sendAllCertificates(
     progress.currentName = participant.full_name
     onProgress({ ...progress })
 
-    // Fetch override per peserta
-    const { data: overrideData } = await supabase
-      .from('template_overrides')
-      .select('*')
-      .eq('participant_id', participant.id)
-      .single()
-
-    const settings = mergeWithOverrides(template, overrideData)
-    const verifyBaseUrl = import.meta.env.VITE_APP_URL || window.location.origin
-
     try {
+      // Fetch override per peserta (safely, might be null)
+      const { data: overrideData, error: overrideError } = await supabase
+        .from('template_overrides')
+        .select('*')
+        .eq('participant_id', participant.id)
+        .maybeSingle()
+
+      if (overrideError) {
+        console.warn(`Gagal memuat override untuk ${participant.id}:`, overrideError.message)
+      }
+
+      const settings = mergeWithOverrides(template, overrideData)
+      const verifyBaseUrl = import.meta.env.VITE_APP_URL || window.location.origin
+
       // Generate PDF
       const { pdfBase64 } = await generateCertificatePdf({
         templatePdfBytes: templateBytes,
