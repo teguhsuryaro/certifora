@@ -57,8 +57,6 @@ export default function ExportPage() {
         </Link>
       </nav>
 
-      <h1 className="text-2xl font-bold text-neutral-900 mb-6">Export Data Peserta</h1>
-
       {/* Summary Card */}
       <div className="glass-card p-4 sm:p-6 mb-6">
         <h2 className="font-semibold text-neutral-900 mb-4">Ringkasan</h2>

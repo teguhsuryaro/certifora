@@ -175,10 +175,9 @@ export default function ParticipantsPage() {
   return (
     <div className="max-w-7xl mx-auto pb-24 relative">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8 mt-4">
         <div>
-          <h1 className="text-3xl font-bold text-neutral-900 tracking-tight">Data Peserta</h1>
-          <p className="text-neutral-500 mt-2">
+          <p className="text-neutral-500">
             Total {participants.length} peserta terdaftar. <span className="font-medium text-success-600">{successCount} terkirim</span>, <span className="font-medium text-warning-600">{pendingCount} belum</span>, <span className="font-medium text-danger-600">{failedCount} gagal</span>.
           </p>
         </div>

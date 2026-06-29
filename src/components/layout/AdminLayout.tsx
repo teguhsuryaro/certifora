@@ -105,10 +105,8 @@ export function AdminLayout() {
           </button>
         </div>
       </aside>
-
       {/* Main content area */}
       <div className="lg:pl-64 flex flex-col min-h-screen">
-        {/* Top header */}
         <header className="sticky top-0 z-30 h-16 bg-white/80 backdrop-blur-md border-b border-neutral-100 flex items-center justify-between px-4 lg:px-8">
           {/* Mobile left: Hamburger & Logo */}
           <div className="flex items-center gap-4 lg:hidden">
@@ -128,15 +126,8 @@ export function AdminLayout() {
             </p>
             <h1 className="text-2xl font-bold text-neutral-900 leading-none">{pageTitle}</h1>
           </div>
-
-          {/* Right: Avatar */}
-          <div className="flex items-center gap-4">
-            <div className="w-9 h-9 bg-primary-100 rounded-full flex items-center justify-center cursor-pointer hover:ring-2 hover:ring-primary-500 hover:ring-offset-2 transition-all">
-              <span className="text-sm font-semibold text-primary-600">
-                {admin?.full_name?.charAt(0) || 'A'}
-              </span>
-            </div>
-          </div>
+          
+          <div className="flex-1" />
         </header>
 
         {/* Page content */}

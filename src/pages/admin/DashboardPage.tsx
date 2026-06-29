@@ -64,21 +64,6 @@ export default function DashboardPage() {
 
   return (
     <div>
-      {/* Page Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
-        <div>
-          <p className="text-sm text-neutral-500 mb-1">
-            Selamat datang, {admin?.full_name?.split(' ')[0] || 'Admin'} 👋
-          </p>
-          <h1 className="text-2xl lg:text-3xl font-bold text-neutral-900">Dashboard</h1>
-        </div>
-        <Link to="/admin/events/new" className="hidden sm:block">
-          <Button variant="primary" icon={<Plus size={18} />}>
-            Buat Event Baru
-          </Button>
-        </Link>
-      </div>
-
       {/* Stats Grid (Baris Atas) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
         <div className="glass-card p-5 flex items-center gap-4">
@@ -122,27 +107,26 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Main Content Area (Daftar Event) - 2 Kolom di Desktop */}
         <div className="lg:col-span-2">
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-4">
             <h2 className="text-lg font-bold text-neutral-900">Daftar Event</h2>
-          </div>
-          
-          {/* Status Filter Tabs */}
-          <div className="flex gap-2 mb-4 overflow-x-auto pb-2 scrollbar-thin">
-            {STATUS_FILTERS.map((filter) => (
-              <button
-                key={filter.value}
-                onClick={() => setStatusFilter(filter.value)}
-                className={`
-                  px-4 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors
-                  ${statusFilter === filter.value
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-white text-neutral-600 border border-neutral-200 hover:bg-neutral-50'
-                  }
-                `}
+            
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full sm:w-auto px-4 py-2 border border-neutral-200 rounded-xl bg-white text-sm font-medium text-neutral-700 hover:border-neutral-300 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors"
               >
-                {filter.label}
-              </button>
-            ))}
+                {STATUS_FILTERS.map(f => (
+                  <option key={f.value} value={f.value}>{f.label}</option>
+                ))}
+              </select>
+              
+              <Link to="/admin/events/new" className="hidden sm:block shrink-0">
+                <Button variant="primary" size="sm" icon={<Plus size={16} />}>
+                  Buat Event
+                </Button>
+              </Link>
+            </div>
           </div>
 
           {/* Event Grid */}

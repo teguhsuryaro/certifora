@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import Draggable, { type DraggableEvent, type DraggableData } from 'react-draggable'
 import { Button, FileUploadBox, PageLoading, Input, Select } from '../../components/ui'
@@ -33,6 +33,7 @@ const QR_POSITIONS: { value: QrPosition; label: string }[] = [
 export default function TemplateEditorPage() {
   const { eventId } = useParams<{ eventId: string }>()
   const canvasContainerRef = useRef<HTMLDivElement>(null)
+  const nameRef = useRef<HTMLDivElement>(null)
 
   const [template, setTemplate] = useState<CertificateTemplate | null>(null)
   const [pdfImage, setPdfImage] = useState<string | null>(null)
@@ -54,6 +55,12 @@ export default function TemplateEditorPage() {
     qr_position: 'bottom_right' as QrPosition,
     qr_size: 80,
   })
+  
+  const [initialSettings, setInitialSettings] = useState(settings)
+  
+  const isDirty = useMemo(() => {
+    return JSON.stringify(settings) !== JSON.stringify(initialSettings)
+  }, [settings, initialSettings])
 
   // Load template data
   useEffect(() => {
@@ -67,7 +74,7 @@ export default function TemplateEditorPage() {
     try {
       const data = await templateService.fetchTemplateByEventId(eventId)
       setTemplate(data)
-      setSettings({
+      const newSettings = {
         name_position_x: data.name_position_x,
         name_position_y: data.name_position_y,
         name_font_size: data.name_font_size,
@@ -76,7 +83,9 @@ export default function TemplateEditorPage() {
         name_text_format: data.name_text_format,
         qr_position: data.qr_position,
         qr_size: data.qr_size,
-      })
+      }
+      setSettings(newSettings)
+      setInitialSettings(newSettings)
 
       if (data.template_file_path) {
         try {
@@ -110,26 +119,30 @@ export default function TemplateEditorPage() {
     }
   }
 
-  const handleDragStop = (_e: DraggableEvent, data: DraggableData) => {
+  const handleDrag = (_e: DraggableEvent, data: DraggableData) => {
     if (!canvasContainerRef.current || pdfDimensions.width === 0) return
-
     const containerRect = canvasContainerRef.current.getBoundingClientRect()
-    const xPercent = ((data.x + data.node.offsetWidth / 2) / containerRect.width) * 100
-    const yPercent = ((data.y + data.node.offsetHeight / 2) / containerRect.height) * 100
+    const nodeWidth = nameRef.current?.offsetWidth || 0
+    const nodeHeight = nameRef.current?.offsetHeight || 0
+    
+    // xPercent = center of the node relative to container width
+    const xPercent = ((data.x + nodeWidth / 2) / containerRect.width) * 100
+    const yPercent = ((data.y + nodeHeight / 2) / containerRect.height) * 100
 
     setSettings(prev => ({
       ...prev,
-      name_position_x: Math.max(0, Math.min(100, xPercent)),
-      name_position_y: Math.max(0, Math.min(100, yPercent)),
+      name_position_x: Number(Math.max(0, Math.min(100, xPercent)).toFixed(1)),
+      name_position_y: Number(Math.max(0, Math.min(100, yPercent)).toFixed(1)),
     }))
   }
 
   const handleSave = async () => {
-    if (!eventId) return
+    if (!eventId || !isDirty) return
     setIsSaving(true)
     setSaveMessage(null)
     try {
       await templateService.updateTemplateSettings(eventId, settings)
+      setInitialSettings(settings)
       setSaveMessage('Pengaturan berhasil disimpan!')
       setTimeout(() => setSaveMessage(null), 3000)
     } catch (error: any) {
@@ -160,15 +173,21 @@ export default function TemplateEditorPage() {
   }
 
   if (isLoading) return <PageLoading />
+  
+  // Calculate controlled position for the draggable element
+  const containerW = canvasContainerRef.current?.offsetWidth || 500
+  const containerH = canvasContainerRef.current?.offsetHeight || 300
+  const nodeW = nameRef.current?.offsetWidth || 0
+  const nodeH = nameRef.current?.offsetHeight || 0
+  
+  const controlledPosition = {
+    x: (settings.name_position_x / 100) * containerW - nodeW / 2,
+    y: (settings.name_position_y / 100) * containerH - nodeH / 2
+  }
 
   return (
     <div className="max-w-7xl mx-auto pb-12">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-neutral-900 tracking-tight">Editor Template Sertifikat</h1>
-        <p className="text-neutral-500 mt-2">Unggah file PDF, atur posisi nama peserta, dan letak QR code.</p>
-      </div>
-
-      <div className="grid lg:grid-cols-5 gap-6">
+      <div className="grid lg:grid-cols-5 gap-6 mt-4">
         {/* === Panel Preview (Kolom Kiri - 3/5) === */}
         <div className="lg:col-span-3">
           <div className="glass-card p-4 sm:p-6 flex flex-col h-full">
@@ -208,13 +227,11 @@ export default function TemplateEditorPage() {
                   {/* Draggable Name Element */}
                   <Draggable
                     bounds="parent"
-                    onStop={handleDragStop}
-                    defaultPosition={{
-                      x: (settings.name_position_x / 100) * (canvasContainerRef.current?.offsetWidth || 500) - 50,
-                      y: (settings.name_position_y / 100) * (canvasContainerRef.current?.offsetHeight || 300) - 15,
-                    }}
+                    onDrag={handleDrag}
+                    position={controlledPosition}
                   >
                     <div
+                      ref={nameRef}
                       className="absolute cursor-move border-[1.5px] border-dashed border-primary-500 bg-primary-50/70 px-3 py-1.5 rounded-md select-none hover:bg-primary-50 transition-colors shadow-sm"
                       style={{
                         fontSize: `${settings.name_font_size * 0.8}px`,
@@ -228,7 +245,7 @@ export default function TemplateEditorPage() {
 
                   {/* QR Code Preview */}
                   <div
-                    className="absolute border-[1.5px] border-dashed border-neutral-400 bg-white/90 flex flex-col items-center justify-center rounded-md shadow-sm"
+                    className="absolute border-[1.5px] border-dashed border-neutral-400 bg-white/90 flex flex-col items-center justify-center rounded-md shadow-sm transition-all"
                     style={{
                       ...getQrPositionStyle(),
                       width: `${settings.qr_size * 0.6}px`,
@@ -446,9 +463,10 @@ export default function TemplateEditorPage() {
             <div className="pt-6 border-t border-neutral-200">
               <Button
                 variant="primary"
-                className="w-full h-12 text-base font-semibold shadow-md"
+                className="w-full h-12 text-base font-semibold shadow-md disabled:opacity-50"
                 onClick={handleSave}
                 isLoading={isSaving}
+                disabled={!isDirty || isSaving}
                 icon={!isSaving && <Save size={20} />}
               >
                 {isSaving ? 'Menyimpan...' : 'Simpan Pengaturan'}
@@ -470,3 +488,4 @@ export default function TemplateEditorPage() {
     </div>
   )
 }
+

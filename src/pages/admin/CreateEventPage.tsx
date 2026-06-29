@@ -87,8 +87,7 @@ export default function CreateEventPage() {
         >
           <ArrowLeft size={20} />
         </button>
-        <div>
-          <h1 className="text-2xl font-bold text-neutral-900 tracking-tight">Buat Event Baru</h1>
+        <div className="flex flex-col gap-2 mb-8 mt-4">
           <p className="text-neutral-500 mt-1">Lengkapi informasi dasar event untuk mulai menerima peserta.</p>
         </div>
       </div>
