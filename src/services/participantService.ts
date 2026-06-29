@@ -139,3 +139,4 @@ export async function fetchParticipantById(participantId: string) {
   if (error) throw error
   return data
 }
+export async function deleteParticipant(id: string) { const { error } = await supabase.from('participants').delete().eq('id', id); if (error) throw error; } 
