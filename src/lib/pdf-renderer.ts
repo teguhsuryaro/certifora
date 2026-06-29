@@ -20,7 +20,7 @@ export async function renderPdfToImage(
   const workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
   pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
 
-  const pdf = await pdfjsLib.getDocument(pdfUrl).promise
+  const pdf = await pdfjsLib.getDocument({ url: pdfUrl }).promise
   const page = await pdf.getPage(1)
   
   const viewport = page.getViewport({ scale })

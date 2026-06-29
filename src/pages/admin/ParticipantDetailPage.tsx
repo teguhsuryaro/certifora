@@ -46,7 +46,15 @@ export default function ParticipantDetailPage() {
         templateService.fetchTemplateByEventId(eventId!),
         templateService.isTemplateReady(eventId!),
       ])
-      setParticipant(pData)
+      
+      // Get signed URL for selfie
+      let selfieSignedUrl = ''
+      if (pData.selfie_path) {
+        const { data: urlData } = await supabase.storage.from('selfies').createSignedUrl(pData.selfie_path, 3600)
+        selfieSignedUrl = urlData?.signedUrl || ''
+      }
+      
+      setParticipant({ ...pData, selfieSignedUrl })
       setTemplate(tData)
       setIsTemplateReady(templateReady)
 
@@ -64,11 +72,6 @@ export default function ParticipantDetailPage() {
     } finally {
       setIsLoading(false)
     }
-  }
-
-  const getSelfieUrl = (path: string) => {
-    const { data } = supabase.storage.from('selfies').getPublicUrl(path)
-    return data?.publicUrl || ''
   }
 
   // Save override
@@ -187,7 +190,7 @@ export default function ParticipantDetailPage() {
           onClick={() => setSelfieModalOpen(true)}
         >
           {participant.selfie_path ? (
-            <img src={getSelfieUrl(participant.selfie_path)} alt="Selfie" className="w-full h-full object-cover" />
+            <img src={participant.selfieSignedUrl} alt="Selfie" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center bg-neutral-100 text-neutral-400">
               <UserIcon size={40} />
@@ -403,7 +406,7 @@ export default function ParticipantDetailPage() {
         <div className="p-2 bg-neutral-100 rounded-xl">
           {participant.selfie_path ? (
             <img
-              src={getSelfieUrl(participant.selfie_path)}
+              src={participant.selfieSignedUrl}
               alt={`Selfie ${participant.full_name}`}
               className="w-full rounded-lg object-contain max-h-[60vh] mx-auto"
             />

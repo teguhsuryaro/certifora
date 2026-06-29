@@ -57,7 +57,28 @@ export default function ParticipantsPage() {
         templateService.isTemplateReady(eventId!),
         getEmailQuota()
       ])
-      setParticipants(data || [])
+      
+      const pData = data || []
+      
+      // Fetch signed urls for selfies in bulk
+      const selfiePaths = pData.map(p => p.selfie_path).filter(Boolean) as string[]
+      let signedUrlMap: Record<string, string> = {}
+      
+      if (selfiePaths.length > 0) {
+        const { data: signedUrls } = await supabase.storage.from('selfies').createSignedUrls(selfiePaths, 3600)
+        if (signedUrls) {
+          signedUrls.forEach((su, index) => {
+            if (su.signedUrl) signedUrlMap[selfiePaths[index]] = su.signedUrl
+          })
+        }
+      }
+      
+      const participantsWithSelfies = pData.map(p => ({
+        ...p,
+        selfieSignedUrl: p.selfie_path ? signedUrlMap[p.selfie_path] : null
+      }))
+
+      setParticipants(participantsWithSelfies)
       setIsTemplateReady(templateReady)
       setQuota(q)
       // reset selection
@@ -144,12 +165,7 @@ export default function ParticipantsPage() {
     }
   }
 
-  // Get selfie URL
-  const getSelfieUrl = (selfiePath: string | null) => {
-    if (!selfiePath) return null
-    const { data } = supabase.storage.from('selfies').getPublicUrl(selfiePath)
-    return data?.publicUrl || null
-  }
+
 
   if (isLoading) return <PageLoading />
 
@@ -287,13 +303,13 @@ export default function ParticipantsPage() {
                         <td className="px-4 py-3">
                           <div className="flex items-center gap-3">
                             <div className="w-9 h-9 rounded-full bg-neutral-200 overflow-hidden shrink-0 border border-neutral-100 shadow-sm">
-                              {p.selfie_path ? (
-                                <img
-                                  src={getSelfieUrl(p.selfie_path) || ''}
-                                  alt=""
-                                  className="w-full h-full object-cover"
-                                  loading="lazy"
-                                />
+                                {p.selfie_path ? (
+                                  <img
+                                    src={p.selfieSignedUrl || ''}
+                                    alt=""
+                                    className="w-full h-full object-cover"
+                                    loading="lazy"
+                                  />
                               ) : (
                                 <div className="w-full h-full flex items-center justify-center text-neutral-400">
                                   <User size={16} />
@@ -362,7 +378,7 @@ export default function ParticipantsPage() {
                     <div className="w-12 h-12 rounded-full bg-neutral-200 overflow-hidden shrink-0 border border-neutral-100 shadow-sm mt-1">
                       {p.selfie_path ? (
                         <img
-                          src={getSelfieUrl(p.selfie_path) || ''}
+                          src={p.selfieSignedUrl || ''}
                           alt=""
                           className="w-full h-full object-cover"
                           loading="lazy"
