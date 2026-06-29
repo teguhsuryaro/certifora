@@ -1,5 +1,5 @@
 import { Modal, ProgressBar, Button } from '../ui'
-
+import { AlertTriangle, CheckCircle2 } from 'lucide-react'
 interface SendProgress {
   total: number
   sent: number
