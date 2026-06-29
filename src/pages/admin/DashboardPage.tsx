@@ -123,7 +123,20 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Aksi Cepat */}
-                <div className="mt-4 flex gap-2">
+                <div className="mt-4 flex flex-col gap-3">
+                  {(!event.certificate_templates?.[0]?.template_file_path) && (
+                    <div 
+                      className="bg-amber-50 border-l-4 border-amber-400 p-2 text-xs text-amber-800 rounded-r-md"
+                      onClick={(e) => { e.preventDefault(); window.location.href = `/admin/events/${event.id}/template`; }}
+                    >
+                      <div className="flex items-start gap-1.5">
+                        <span className="text-amber-500 mt-0.5">⚠️</span>
+                        <span>
+                          Template belum diatur. <span className="font-semibold underline cursor-pointer">Atur sekarang →</span>
+                        </span>
+                      </div>
+                    </div>
+                  )}
                   <span className="text-xs text-primary-600 font-medium">
                     Kelola →
                   </span>

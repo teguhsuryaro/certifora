@@ -116,6 +116,23 @@ export default function EventDetailPage() {
         </div>
       </div>
 
+      {(!event.certificate_templates?.[0]?.template_file_path) && (
+        <div className="mb-6 bg-amber-50 border-l-4 border-amber-400 p-4 text-amber-800 rounded-r-lg shadow-sm">
+          <div className="flex items-start gap-3">
+            <span className="text-amber-500 text-xl leading-none">⚠️</span>
+            <div>
+              <p className="font-semibold text-sm">Template sertifikat belum diatur</p>
+              <p className="text-xs mt-1 opacity-90">
+                Anda tidak dapat mengirim sertifikat kepada peserta sebelum template PDF diunggah. 
+                <Link to={`/admin/events/${event.id}/template`} className="font-bold underline ml-1 hover:text-amber-900 transition-colors">
+                  Atur sekarang →
+                </Link>
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Content Grid */}
       <div className="grid gap-6 lg:grid-cols-3">
         {/* Left Column — Info & Navigation */}

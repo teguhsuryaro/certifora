@@ -15,7 +15,8 @@ export async function fetchEvents() {
     .from('events')
     .select(`
       *,
-      participants(count)
+      participants(count),
+      certificate_templates(template_file_path)
     `)
     .order('created_at', { ascending: false })
 
