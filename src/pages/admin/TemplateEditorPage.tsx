@@ -62,22 +62,9 @@ export default function TemplateEditorPage() {
     return JSON.stringify(settings) !== JSON.stringify(initialSettings)
   }, [settings, initialSettings])
 
-  const [nodeSize, setNodeSize] = useState({ w: 0, h: 0 })
-
-  // Track node size
-  useEffect(() => {
-    if (!nameRef.current) return
-    const resizeObserver = new ResizeObserver((entries) => {
-      for (const entry of entries) {
-        setNodeSize({
-          w: entry.contentRect.width,
-          h: entry.contentRect.height
-        })
-      }
-    })
-    resizeObserver.observe(nameRef.current)
-    return () => resizeObserver.disconnect()
-  }, [template, settings.name_font_size, settings.name_text_format, settings.name_font_family])
+  // We do not need a ResizeObserver if we use offsetWidth directly during calculation.
+  // Using ResizeObserver can cause infinite render loops with react-draggable.
+  const [isDragging, setIsDragging] = useState(false);
 
   // Load template data
   useEffect(() => {
@@ -137,13 +124,15 @@ export default function TemplateEditorPage() {
   }
 
   const handleDrag = (_e: DraggableEvent, data: DraggableData) => {
-    if (!canvasContainerRef.current) return
+    if (!canvasContainerRef.current || !nameRef.current) return
     const containerW = canvasContainerRef.current.offsetWidth
     const containerH = canvasContainerRef.current.offsetHeight
+    const nodeW = nameRef.current.offsetWidth
+    const nodeH = nameRef.current.offsetHeight
     
     // xPercent = center of the node relative to container width
-    const xPercent = ((data.x + nodeSize.w / 2) / containerW) * 100
-    const yPercent = ((data.y + nodeSize.h / 2) / containerH) * 100
+    const xPercent = ((data.x + nodeW / 2) / containerW) * 100
+    const yPercent = ((data.y + nodeH / 2) / containerH) * 100
 
     setSettings(prev => ({
       ...prev,
@@ -193,10 +182,12 @@ export default function TemplateEditorPage() {
   // Calculate controlled position for the draggable element
   const containerW = canvasContainerRef.current?.offsetWidth || 500
   const containerH = canvasContainerRef.current?.offsetHeight || 300
+  const nodeW = nameRef.current?.offsetWidth || 0
+  const nodeH = nameRef.current?.offsetHeight || 0
   
   const controlledPosition = {
-    x: (settings.name_position_x / 100) * containerW - nodeSize.w / 2,
-    y: (settings.name_position_y / 100) * containerH - nodeSize.h / 2
+    x: (settings.name_position_x / 100) * containerW - nodeW / 2,
+    y: (settings.name_position_y / 100) * containerH - nodeH / 2
   }
 
   return (
@@ -225,22 +216,23 @@ export default function TemplateEditorPage() {
                 </Button>
               </div>
             ) : (
-              <div className="flex-1 flex flex-col">
+              <div className="flex-1 flex flex-col items-center justify-center p-2 sm:p-4 bg-neutral-50 rounded-xl border border-neutral-100 overflow-hidden">
                 <div 
                   ref={canvasContainerRef}
-                  className="relative border border-neutral-200 shadow-sm bg-neutral-100 overflow-hidden rounded-xl w-full"
-                  style={{
-                    backgroundImage: `url(${pdfImage})`,
-                    backgroundSize: 'contain',
-                    backgroundRepeat: 'no-repeat',
-                    backgroundPosition: 'center',
-                    aspectRatio: `${pdfDimensions.width} / ${pdfDimensions.height}`,
-                    maxHeight: '75vh',
-                  }}
+                  className="relative shadow-sm bg-white overflow-hidden rounded-xl border border-neutral-200"
+                  style={{ display: 'inline-block' }}
                 >
+                  <img 
+                    src={pdfImage} 
+                    alt="Template" 
+                    className="max-w-full max-h-[65vh] object-contain pointer-events-none block" 
+                  />
+                  
                   {/* Draggable Name Element */}
                   <Draggable
                     bounds="parent"
+                    onStart={() => setIsDragging(true)}
+                    onStop={() => setIsDragging(false)}
                     onDrag={handleDrag}
                     position={controlledPosition}
                   >
