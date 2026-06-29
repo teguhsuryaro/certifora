@@ -48,52 +48,173 @@ export function exportToPdf(
   // Buat HTML tabel untuk di-print sebagai PDF
   const rows = participants.map((p, i) => `
     <tr>
-      <td style="border:1px solid #ddd;padding:8px;text-align:center">${i + 1}</td>
-      <td style="border:1px solid #ddd;padding:8px">${p.full_name}</td>
-      <td style="border:1px solid #ddd;padding:8px">${p.email}</td>
-      <td style="border:1px solid #ddd;padding:8px;font-family:monospace">${p.certificate_code}</td>
-      <td style="border:1px solid #ddd;padding:8px;text-align:center">${formatDeliveryStatus(p.delivery_status)}</td>
-      <td style="border:1px solid #ddd;padding:8px">${new Date(p.submitted_at).toLocaleDateString('id-ID')}</td>
+      <td class="text-center">${i + 1}</td>
+      <td>${p.full_name}</td>
+      <td>${p.email}</td>
+      <td class="font-mono">${p.certificate_code}</td>
+      <td class="text-center">
+        <span class="status-badge status-${p.delivery_status}">
+          ${formatDeliveryStatus(p.delivery_status)}
+        </span>
+      </td>
+      <td>${new Date(p.submitted_at).toLocaleDateString('id-ID')}</td>
     </tr>
   `).join('')
 
   const html = `
     <!DOCTYPE html>
-    <html>
+    <html lang="id">
       <head>
-        <title>Data Peserta - ${eventName}</title>
+        <meta charset="UTF-8">
+        <title>Rekap Peserta - ${eventName}</title>
         <style>
-          body { font-family: Arial, sans-serif; padding: 20px; color: #333; }
-          h1 { font-size: 18px; margin-bottom: 4px; }
-          .info { color: #666; font-size: 13px; margin-bottom: 20px; }
-          table { width: 100%; border-collapse: collapse; font-size: 12px; }
-          th { background: #4F46E5; color: white; padding: 10px 8px; text-align: left; }
-          td { border: 1px solid #ddd; padding: 8px; }
-          tr:nth-child(even) { background: #f9fafb; }
-          .footer { margin-top: 20px; font-size: 11px; color: #999; text-align: center; }
+          /* Global Styles */
+          body { 
+            font-family: 'Inter', system-ui, -apple-system, sans-serif; 
+            color: #1f2937; 
+            line-height: 1.5;
+            margin: 0;
+            padding: 2rem;
+          }
+          
+          /* Header */
+          .header {
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #0d9488;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+          }
+          .brand {
+            font-size: 24px;
+            font-weight: 800;
+            color: #0d9488;
+            letter-spacing: -0.5px;
+            margin: 0 0 4px 0;
+          }
+          .doc-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #4b5563;
+            margin: 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+          }
+          .event-meta {
+            text-align: right;
+          }
+          .event-meta h2 {
+            margin: 0 0 4px 0;
+            font-size: 18px;
+            color: #111827;
+          }
+          .event-meta p {
+            margin: 0;
+            font-size: 13px;
+            color: #6b7280;
+          }
+
+          /* Table Styles */
+          table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            font-size: 11pt; 
+            margin-bottom: 2rem;
+          }
+          th { 
+            background-color: #0d9488; 
+            color: white; 
+            padding: 10px 12px; 
+            text-align: left; 
+            font-weight: 600;
+          }
+          td { 
+            border: 1px solid #e5e7eb; 
+            padding: 10px 12px; 
+            vertical-align: top;
+          }
+          tr:nth-child(even) td { 
+            background-color: #f0fdfa; 
+          }
+          tr:nth-child(odd) td {
+            background-color: white;
+          }
+
+          /* Utility Classes */
+          .text-center { text-align: center; }
+          .font-mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.9em; }
+          
+          /* Badges */
+          .status-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 9999px;
+            font-size: 10pt;
+            font-weight: 500;
+          }
+          .status-success { background: #dcfce7; color: #166534; }
+          .status-pending { background: #fef9c3; color: #854d0e; }
+          .status-failed { background: #fee2e2; color: #991b1b; }
+
+          /* Footer */
+          .footer { 
+            margin-top: 3rem; 
+            font-size: 10pt; 
+            color: #9ca3af; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid #e5e7eb;
+            padding-top: 1rem;
+          }
+
+          /* Print Optimization */
+          @media print {
+            body { padding: 0; }
+            .no-print { display: none !important; }
+            @page {
+              margin: 1.5cm;
+              size: A4 landscape;
+            }
+            table { page-break-inside: auto; }
+            tr { page-break-inside: avoid; page-break-after: auto; }
+            thead { display: table-header-group; }
+            tfoot { display: table-footer-group; }
+          }
         </style>
       </head>
       <body>
-        <h1>${eventName}</h1>
-        <p class="info">${organizer} • ${new Date(eventDate).toLocaleDateString('id-ID', {
-          day: 'numeric', month: 'long', year: 'numeric'
-        })} • ${participants.length} peserta</p>
+        <div class="header">
+          <div>
+            <h1 class="brand">Certifora</h1>
+            <p class="doc-title">Rekap Data Peserta</p>
+          </div>
+          <div class="event-meta">
+            <h2>${eventName}</h2>
+            <p>${organizer} &bull; ${new Date(eventDate).toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
+          </div>
+        </div>
         
         <table>
           <thead>
             <tr>
-              <th>No</th>
+              <th style="width: 50px;" class="text-center">No</th>
               <th>Nama Lengkap</th>
               <th>Email</th>
               <th>Kode Sertifikat</th>
-              <th>Status</th>
+              <th class="text-center">Status</th>
               <th>Tanggal Daftar</th>
             </tr>
           </thead>
           <tbody>${rows}</tbody>
         </table>
         
-        <p class="footer">Diekspor dari Certifora pada ${new Date().toLocaleString('id-ID')}</p>
+        <div class="footer">
+          <div>Total: <strong>${participants.length}</strong> peserta</div>
+          <div>Dicetak pada: ${new Date().toLocaleString('id-ID')}</div>
+          <div>Dokumen ini di-generate otomatis oleh Certifora</div>
+        </div>
       </body>
     </html>
   `
