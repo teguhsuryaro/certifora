@@ -65,6 +65,14 @@ export default function TemplateEditorPage() {
   // We do not need a ResizeObserver if we use offsetWidth directly during calculation.
   // Using ResizeObserver can cause infinite render loops with react-draggable.
   const [isDragging, setIsDragging] = useState(false);
+  const [renderTrigger, setRenderTrigger] = useState(0);
+
+  // Force re-render when fonts are fully loaded so node dimensions are accurate
+  useEffect(() => {
+    document.fonts.ready.then(() => {
+      setRenderTrigger(prev => prev + 1)
+    })
+  }, [settings.name_font_family, settings.name_font_size])
 
   // Load template data
   useEffect(() => {
@@ -136,9 +144,16 @@ export default function TemplateEditorPage() {
 
     setSettings(prev => ({
       ...prev,
-      name_position_x: Number(Math.max(0, Math.min(100, xPercent)).toFixed(1)),
-      name_position_y: Number(Math.max(0, Math.min(100, yPercent)).toFixed(1)),
+      name_position_x: Math.max(0, Math.min(100, xPercent)),
+      name_position_y: Math.max(0, Math.min(100, yPercent)),
     }))
+  }
+
+  // Handle number input safely (support comma for Indonesian locale)
+  const handleNumberInput = (field: 'name_position_x' | 'name_position_y', value: string) => {
+    const safeValue = value.replace(',', '.')
+    if (safeValue === '' || isNaN(Number(safeValue))) return
+    setSettings(prev => ({ ...prev, [field]: Number(safeValue) }))
   }
 
   const handleSave = async () => {
@@ -225,6 +240,7 @@ export default function TemplateEditorPage() {
                   <img 
                     src={pdfImage} 
                     alt="Template" 
+                    onLoad={() => setRenderTrigger(prev => prev + 1)}
                     className="max-w-full max-h-[65vh] object-contain pointer-events-none block" 
                   />
                   
@@ -396,22 +412,16 @@ export default function TemplateEditorPage() {
                 <Input
                   id="posX"
                   label="Posisi X (%)"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={0.5}
-                  value={settings.name_position_x}
-                  onChange={(e) => setSettings(prev => ({ ...prev, name_position_x: Number(e.target.value) }))}
+                  type="text"
+                  value={Number(settings.name_position_x.toFixed(1))}
+                  onChange={(e) => handleNumberInput('name_position_x', e.target.value)}
                 />
                 <Input
                   id="posY"
                   label="Posisi Y (%)"
-                  type="number"
-                  min={0}
-                  max={100}
-                  step={0.5}
-                  value={settings.name_position_y}
-                  onChange={(e) => setSettings(prev => ({ ...prev, name_position_y: Number(e.target.value) }))}
+                  type="text"
+                  value={Number(settings.name_position_y.toFixed(1))}
+                  onChange={(e) => handleNumberInput('name_position_y', e.target.value)}
                 />
               </div>
             </div>
