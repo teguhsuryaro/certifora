@@ -4,8 +4,9 @@ import * as participantService from '../../services/participantService'
 import * as templateService from '../../services/templateService'
 import * as emailService from '../../services/emailService'
 import { supabase } from '../../lib/supabase'
+import { renderPdfToImage } from '../../lib/pdf-renderer'
 import { Button, StatusBadge, Modal, Input, PageLoading, ConfirmModal } from '../../components/ui'
-import { ArrowLeft, Mail, Calendar, Hash, Settings, Activity, Trash2, User as UserIcon } from 'lucide-react'
+import { ArrowLeft, Mail, Calendar, Hash, Settings, Activity, Trash2, User as UserIcon, FileText } from 'lucide-react'
 import type { DeliveryStatus } from '../../types/database'
 
 export default function ParticipantDetailPage() {
@@ -19,6 +20,11 @@ export default function ParticipantDetailPage() {
   const [selfieModalOpen, setSelfieModalOpen] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
   const [confirmDelete, setConfirmDelete] = useState(false)
+
+  // Preview state
+  const [pdfImage, setPdfImage] = useState<string | null>(null)
+  const [renderError, setRenderError] = useState<string | null>(null)
+  const [renderTrigger, setRenderTrigger] = useState(0)
 
   // Override state
   const [overrides, setOverrides] = useState({
@@ -37,6 +43,13 @@ export default function ParticipantDetailPage() {
       loadData()
     }
   }, [participantId, eventId])
+
+  // Force re-render when fonts are fully loaded
+  useEffect(() => {
+    document.fonts.ready.then(() => {
+      setRenderTrigger(prev => prev + 1)
+    })
+  }, [template?.name_font_family, overrides.name_font_size])
 
   const loadData = async () => {
     setIsLoading(true)
@@ -57,6 +70,16 @@ export default function ParticipantDetailPage() {
       setParticipant({ ...pData, selfieSignedUrl })
       setTemplate(tData)
       setIsTemplateReady(templateReady)
+
+      if (tData?.template_file_path) {
+        try {
+          const url = await templateService.getTemplateUrl(tData.template_file_path)
+          const result = await renderPdfToImage(url, 1.5)
+          setPdfImage(result.dataUrl)
+        } catch (err: any) {
+          setRenderError(err.message)
+        }
+      }
 
       // Load existing overrides
       if (pData.template_overrides?.[0]) {
@@ -167,6 +190,34 @@ export default function ParticipantDetailPage() {
     failed: { variant: 'danger' as const, label: 'Gagal' },
   }[participant.delivery_status as DeliveryStatus]
 
+  const currentSettings = {
+    name_position_x: overrides.name_position_x !== null ? overrides.name_position_x : (template?.name_position_x || 50),
+    name_position_y: overrides.name_position_y !== null ? overrides.name_position_y : (template?.name_position_y || 50),
+    name_font_size: overrides.name_font_size !== null ? overrides.name_font_size : (template?.name_font_size || 24),
+  }
+
+  const getFormattedName = () => {
+    if (!participant || !template) return ''
+    const name = participant.full_name
+    switch (template.name_text_format) {
+      case 'uppercase': return name.toUpperCase()
+      case 'lowercase': return name.toLowerCase()
+      case 'title_case': return name.split(' ').map((w: string) => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ')
+      default: return name
+    }
+  }
+
+  const getQrPositionStyle = () => {
+    const margin = 16
+    switch (template?.qr_position) {
+      case 'top_left': return { top: margin, left: margin }
+      case 'top_right': return { top: margin, right: margin }
+      case 'bottom_left': return { bottom: margin, left: margin }
+      case 'bottom_right': return { bottom: margin, right: margin }
+      default: return { bottom: margin, right: margin }
+    }
+  }
+
   return (
     <div className="max-w-4xl mx-auto pb-16">
       {/* Breadcrumb */}
@@ -224,6 +275,66 @@ export default function ParticipantDetailPage() {
             <span className="hidden sm:inline">Hapus</span>
           </Button>
         </div>
+      </div>
+
+      {/* Preview Section */}
+      <div className="glass-card p-6 mb-8">
+        <h2 className="text-lg font-bold text-neutral-900 mb-4 flex items-center gap-2">
+          <FileText size={20} className="text-primary-600" />
+          Pratinjau Sertifikat Peserta
+        </h2>
+        
+        {!template?.template_file_path ? (
+          <div className="w-full h-48 border-2 border-dashed border-neutral-300 rounded-2xl flex items-center justify-center text-neutral-500 bg-neutral-50/50">
+            Template PDF belum diatur
+          </div>
+        ) : renderError ? (
+          <div className="w-full h-48 border border-danger-200 rounded-2xl flex items-center justify-center text-danger-600 bg-danger-50">
+            Gagal merender PDF: {renderError}
+          </div>
+        ) : (
+          <div className="flex justify-center bg-neutral-100/50 rounded-xl p-4 overflow-hidden border border-neutral-200">
+            <div className="relative shadow-sm bg-white overflow-hidden rounded-xl border border-neutral-200 inline-block">
+              <img 
+                src={pdfImage || ''} 
+                alt="Template Preview" 
+                onLoad={() => setRenderTrigger(prev => prev + 1)}
+                className="max-w-full max-h-[65vh] object-contain pointer-events-none block" 
+              />
+              
+              {/* Participant Name */}
+              {template && (
+                <div
+                  className="absolute cursor-default select-none whitespace-nowrap transition-all duration-200"
+                  style={{
+                    left: `${currentSettings.name_position_x}%`,
+                    top: `${currentSettings.name_position_y}%`,
+                    transform: 'translate(-50%, -50%)',
+                    fontSize: `${currentSettings.name_font_size * 0.8}px`,
+                    color: template.name_font_color,
+                    fontFamily: template.name_font_family,
+                  }}
+                >
+                  {getFormattedName()}
+                </div>
+              )}
+
+              {/* QR Code Placeholder */}
+              {template && (
+                <div
+                  className="absolute border-[1.5px] border-dashed border-neutral-400 bg-white/90 flex flex-col items-center justify-center rounded-md shadow-sm"
+                  style={{
+                    ...getQrPositionStyle(),
+                    width: `${template.qr_size * 0.6}px`,
+                    height: `${template.qr_size * 0.6}px`,
+                  }}
+                >
+                  <span className="text-xs font-bold text-neutral-400 tracking-widest">QR</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="grid gap-8 lg:grid-cols-2">
