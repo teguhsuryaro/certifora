@@ -45,14 +45,23 @@ export default function TemplateEditorPage() {
   const [renderError, setRenderError] = useState<string | null>(null)
 
   // Editable settings
-  const [settings, setSettings] = useState({
+  const [settings, setSettings] = useState<{
+    name_position_x: number | string;
+    name_position_y: number | string;
+    name_font_size: number | string;
+    name_font_color: string;
+    name_font_family: string;
+    name_text_format: TextFormat;
+    qr_position: QrPosition;
+    qr_size: number | string;
+  }>({
     name_position_x: 50,
     name_position_y: 50,
     name_font_size: 24,
     name_font_color: '#000000',
     name_font_family: 'Inter',
-    name_text_format: 'original' as TextFormat,
-    qr_position: 'bottom_right' as QrPosition,
+    name_text_format: 'original',
+    qr_position: 'bottom_right',
     qr_size: 80,
   })
   
@@ -149,11 +158,16 @@ export default function TemplateEditorPage() {
     }))
   }
 
-  // Handle number input safely (support comma for Indonesian locale)
-  const handleNumberInput = (field: 'name_position_x' | 'name_position_y', value: string) => {
+  // Handle number input safely (support comma for Indonesian locale and empty strings)
+  const handleNumberInput = (field: keyof typeof settings, value: string) => {
+    if (value === '') {
+      setSettings(prev => ({ ...prev, [field]: '' }))
+      return
+    }
     const safeValue = value.replace(',', '.')
-    if (safeValue === '' || isNaN(Number(safeValue))) return
-    setSettings(prev => ({ ...prev, [field]: Number(safeValue) }))
+    const num = Number(safeValue)
+    if (isNaN(num)) return
+    setSettings(prev => ({ ...prev, [field]: num }))
   }
 
   const handleSave = async () => {
@@ -161,7 +175,14 @@ export default function TemplateEditorPage() {
     setIsSaving(true)
     setSaveMessage(null)
     try {
-      await templateService.updateTemplateSettings(eventId, settings)
+      const payload = {
+        ...settings,
+        name_position_x: Number(settings.name_position_x || 0),
+        name_position_y: Number(settings.name_position_y || 0),
+        name_font_size: Number(settings.name_font_size || 24),
+        qr_size: Number(settings.qr_size || 80),
+      }
+      await templateService.updateTemplateSettings(eventId, payload as any)
       setInitialSettings(settings)
       setSaveMessage('Pengaturan berhasil disimpan!')
       setTimeout(() => setSaveMessage(null), 3000)
@@ -201,8 +222,8 @@ export default function TemplateEditorPage() {
   const nodeH = nameRef.current?.offsetHeight || 0
   
   const controlledPosition = {
-    x: (settings.name_position_x / 100) * containerW - nodeW / 2,
-    y: (settings.name_position_y / 100) * containerH - nodeH / 2
+    x: (Number(settings.name_position_x || 0) / 100) * containerW - nodeW / 2,
+    y: (Number(settings.name_position_y || 0) / 100) * containerH - nodeH / 2
   }
 
   return (
@@ -256,7 +277,7 @@ export default function TemplateEditorPage() {
                       ref={nameRef}
                       className="absolute top-0 left-0 cursor-move border-[1.5px] border-dashed border-primary-500 bg-primary-50/70 px-3 py-1.5 rounded-md select-none hover:bg-primary-50 transition-colors shadow-sm"
                       style={{
-                        fontSize: `${settings.name_font_size * 0.8}px`,
+                        fontSize: `${Number(settings.name_font_size || 0) * 0.8}px`,
                         color: settings.name_font_color,
                         fontFamily: settings.name_font_family,
                       }}
@@ -270,8 +291,8 @@ export default function TemplateEditorPage() {
                     className="absolute border-[1.5px] border-dashed border-neutral-400 bg-white/90 flex flex-col items-center justify-center rounded-md shadow-sm transition-all"
                     style={{
                       ...getQrPositionStyle(),
-                      width: `${settings.qr_size * 0.6}px`,
-                      height: `${settings.qr_size * 0.6}px`,
+                      width: `${Number(settings.qr_size || 0) * 0.6}px`,
+                      height: `${Number(settings.qr_size || 0) * 0.6}px`,
                     }}
                   >
                     <span className="text-xs font-bold text-neutral-400 tracking-widest">QR</span>
@@ -374,7 +395,7 @@ export default function TemplateEditorPage() {
                   min={8}
                   max={120}
                   value={settings.name_font_size}
-                  onChange={(e) => setSettings(prev => ({ ...prev, name_font_size: Number(e.target.value) }))}
+                  onChange={(e) => handleNumberInput('name_font_size', e.target.value)}
                 />
               </div>
 
@@ -412,15 +433,21 @@ export default function TemplateEditorPage() {
                 <Input
                   id="posX"
                   label="Posisi X (%)"
-                  type="text"
-                  value={Number(settings.name_position_x.toFixed(1))}
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.5}
+                  value={typeof settings.name_position_x === 'number' ? Number(settings.name_position_x.toFixed(1)) : settings.name_position_x}
                   onChange={(e) => handleNumberInput('name_position_x', e.target.value)}
                 />
                 <Input
                   id="posY"
                   label="Posisi Y (%)"
-                  type="text"
-                  value={Number(settings.name_position_y.toFixed(1))}
+                  type="number"
+                  min={0}
+                  max={100}
+                  step={0.5}
+                  value={typeof settings.name_position_y === 'number' ? Number(settings.name_position_y.toFixed(1)) : settings.name_position_y}
                   onChange={(e) => handleNumberInput('name_position_y', e.target.value)}
                 />
               </div>
@@ -471,7 +498,7 @@ export default function TemplateEditorPage() {
                 min={40}
                 max={200}
                 value={settings.qr_size}
-                onChange={(e) => setSettings(prev => ({ ...prev, qr_size: Number(e.target.value) }))}
+                onChange={(e) => handleNumberInput('qr_size', e.target.value)}
               />
             </div>
 
