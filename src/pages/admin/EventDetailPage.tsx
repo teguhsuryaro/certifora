@@ -101,7 +101,8 @@ export default function EventDetailPage() {
   const transitions = getAllowedTransitions(event.status)
   const registrationUrl = getEventRegistrationUrl(event.id)
   const participantCount = event.participants?.[0]?.count || 0
-  const isTemplateReady = !!event.certificate_templates?.[0]?.template_file_path
+  const templateObj = Array.isArray(event.certificate_templates) ? event.certificate_templates[0] : event.certificate_templates
+  const isTemplateReady = !!templateObj?.template_file_path
 
   const TABS = [
     { id: 'info', label: 'Info Event', icon: <Info size={18} /> },

@@ -62,6 +62,23 @@ export default function TemplateEditorPage() {
     return JSON.stringify(settings) !== JSON.stringify(initialSettings)
   }, [settings, initialSettings])
 
+  const [nodeSize, setNodeSize] = useState({ w: 0, h: 0 })
+
+  // Track node size
+  useEffect(() => {
+    if (!nameRef.current) return
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setNodeSize({
+          w: entry.contentRect.width,
+          h: entry.contentRect.height
+        })
+      }
+    })
+    resizeObserver.observe(nameRef.current)
+    return () => resizeObserver.disconnect()
+  }, [template, settings.name_font_size, settings.name_text_format, settings.name_font_family])
+
   // Load template data
   useEffect(() => {
     if (!eventId) return
@@ -120,14 +137,13 @@ export default function TemplateEditorPage() {
   }
 
   const handleDrag = (_e: DraggableEvent, data: DraggableData) => {
-    if (!canvasContainerRef.current || pdfDimensions.width === 0) return
-    const containerRect = canvasContainerRef.current.getBoundingClientRect()
-    const nodeWidth = nameRef.current?.offsetWidth || 0
-    const nodeHeight = nameRef.current?.offsetHeight || 0
+    if (!canvasContainerRef.current) return
+    const containerW = canvasContainerRef.current.offsetWidth
+    const containerH = canvasContainerRef.current.offsetHeight
     
     // xPercent = center of the node relative to container width
-    const xPercent = ((data.x + nodeWidth / 2) / containerRect.width) * 100
-    const yPercent = ((data.y + nodeHeight / 2) / containerRect.height) * 100
+    const xPercent = ((data.x + nodeSize.w / 2) / containerW) * 100
+    const yPercent = ((data.y + nodeSize.h / 2) / containerH) * 100
 
     setSettings(prev => ({
       ...prev,
@@ -177,12 +193,10 @@ export default function TemplateEditorPage() {
   // Calculate controlled position for the draggable element
   const containerW = canvasContainerRef.current?.offsetWidth || 500
   const containerH = canvasContainerRef.current?.offsetHeight || 300
-  const nodeW = nameRef.current?.offsetWidth || 0
-  const nodeH = nameRef.current?.offsetHeight || 0
   
   const controlledPosition = {
-    x: (settings.name_position_x / 100) * containerW - nodeW / 2,
-    y: (settings.name_position_y / 100) * containerH - nodeH / 2
+    x: (settings.name_position_x / 100) * containerW - nodeSize.w / 2,
+    y: (settings.name_position_y / 100) * containerH - nodeSize.h / 2
   }
 
   return (
