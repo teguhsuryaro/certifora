@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom'
 import * as participantService from '../../services/participantService'
 import * as emailService from '../../services/emailService'
 import * as templateService from '../../services/templateService'
+import { getEmailQuota, type EmailQuota } from '../../services/emailQuotaService'
 import { supabase } from '../../lib/supabase'
 import { Button, StatusBadge, EmptyState, PageLoading, Input, ConfirmModal } from '../../components/ui'
 import { SendProgressModal } from '../../components/shared/SendProgressModal'
@@ -31,6 +32,7 @@ export default function ParticipantsPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isTemplateReady, setIsTemplateReady] = useState(false)
+  const [quota, setQuota] = useState<EmailQuota | null>(null)
 
   const [confirmSendAll, setConfirmSendAll] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -46,12 +48,14 @@ export default function ParticipantsPage() {
   const loadParticipants = async () => {
     setIsLoading(true)
     try {
-      const [data, templateReady] = await Promise.all([
+      const [data, templateReady, q] = await Promise.all([
         participantService.fetchParticipants(eventId!),
-        templateService.isTemplateReady(eventId!)
+        templateService.isTemplateReady(eventId!),
+        getEmailQuota()
       ])
       setParticipants(data || [])
       setIsTemplateReady(templateReady)
+      setQuota(q)
     } catch (error) {
       console.error('Failed to load data:', error)
     } finally {
@@ -138,6 +142,11 @@ export default function ParticipantsPage() {
             </Button>
             {!isTemplateReady && (
               <span className="text-xs text-danger-500 font-medium">Template belum siap</span>
+            )}
+            {quota && (
+              <span className={`text-xs font-medium ${quota.dailyLimit - quota.dailySent < pendingCount ? 'text-danger-600' : 'text-neutral-500'}`}>
+                Sisa kuota harian: {Math.max(0, quota.dailyLimit - quota.dailySent)}/{quota.dailyLimit}
+              </span>
             )}
           </div>
         </div>
@@ -289,7 +298,16 @@ export default function ParticipantsPage() {
         onClose={() => setConfirmSendAll(false)}
         onConfirm={handleSendAll}
         title="Kirim Semua Sertifikat"
-        message={`Akan mengirim sertifikat ke ${pendingCount} peserta yang belum terkirim. Estimasi waktu: ~${Math.ceil((pendingCount * 2) / 60)} menit.`}
+        message={
+          <div className="space-y-2">
+            <p>Akan mengirim sertifikat ke {pendingCount} peserta yang belum terkirim. Estimasi waktu: ~{Math.ceil((pendingCount * 2) / 60)} menit.</p>
+            {quota && (quota.dailyLimit - quota.dailySent < pendingCount) && (
+              <p className="text-danger-600 font-medium text-sm p-3 bg-danger-50 rounded-lg">
+                ⚠️ Peringatan: Sisa kuota email harian Anda ({Math.max(0, quota.dailyLimit - quota.dailySent)}) lebih kecil dari jumlah peserta ({pendingCount}). Sebagian pengiriman akan gagal.
+              </p>
+            )}
+          </div>
+        }
         confirmText="Mulai Kirim"
       />
 

@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useEventStore } from '../../stores/eventStore'
+import { getEmailQuota, type EmailQuota } from '../../services/emailQuotaService'
 import { Button, StatusBadge, EmptyState, PageLoading } from '../../components/ui'
 import type { EventStatus } from '../../types/database'
 
@@ -27,9 +28,11 @@ const STATUS_FILTERS: { value: string; label: string }[] = [
 export default function DashboardPage() {
   const { events, isLoading, fetchEvents } = useEventStore()
   const [statusFilter, setStatusFilter] = useState('all')
+  const [quota, setQuota] = useState<EmailQuota | null>(null)
 
   useEffect(() => {
     fetchEvents()
+    getEmailQuota().then(setQuota).catch(console.error)
   }, [fetchEvents])
 
   const filteredEvents = statusFilter === 'all'
@@ -54,6 +57,46 @@ export default function DashboardPage() {
           </Button>
         </Link>
       </div>
+
+      {/* Quota Card */}
+      {quota && (
+        <div className="mb-6 grid gap-4 sm:grid-cols-2">
+          <div className="bg-white rounded-xl border border-neutral-200 p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-neutral-500 mb-1">Kuota Harian</p>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-neutral-900">{quota.dailySent}</span>
+                <span className="text-sm text-neutral-500">/ {quota.dailyLimit}</span>
+              </div>
+            </div>
+            <div className="w-24">
+              <div className="h-2 w-full bg-neutral-100 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full ${quota.dailySent / quota.dailyLimit > 0.9 ? 'bg-danger-500' : quota.dailySent / quota.dailyLimit > 0.7 ? 'bg-warning-500' : 'bg-success-500'}`}
+                  style={{ width: `${Math.min(100, (quota.dailySent / quota.dailyLimit) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+          <div className="bg-white rounded-xl border border-neutral-200 p-4 flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-neutral-500 mb-1">Kuota Bulanan</p>
+              <div className="flex items-baseline gap-1">
+                <span className="text-2xl font-bold text-neutral-900">{quota.monthlySent}</span>
+                <span className="text-sm text-neutral-500">/ {quota.monthlyLimit}</span>
+              </div>
+            </div>
+            <div className="w-24">
+              <div className="h-2 w-full bg-neutral-100 rounded-full overflow-hidden">
+                <div 
+                  className={`h-full rounded-full ${quota.monthlySent / quota.monthlyLimit > 0.9 ? 'bg-danger-500' : quota.monthlySent / quota.monthlyLimit > 0.7 ? 'bg-warning-500' : 'bg-success-500'}`}
+                  style={{ width: `${Math.min(100, (quota.monthlySent / quota.monthlyLimit) * 100)}%` }}
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Status Filter Tabs */}
       <div className="flex gap-2 mb-6 overflow-x-auto pb-2">
