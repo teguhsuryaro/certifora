@@ -39,7 +39,7 @@ export function AdminLayout() {
       >
         {/* Sidebar Header */}
         <div className="h-16 flex items-center px-6 border-b border-gray-200">
-          <Link to="/admin/dashboard" className="text-xl font-bold text-indigo-600">
+          <Link to="/admin/dashboard" className="text-xl font-bold text-primary-600">
             Certifora
           </Link>
         </div>
@@ -54,7 +54,7 @@ export function AdminLayout() {
               className={`
                 flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors
                 ${location.pathname === item.path
-                  ? 'bg-indigo-50 text-indigo-700'
+                  ? 'bg-primary-50 text-primary-700'
                   : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
                 }
               `}
@@ -68,8 +68,8 @@ export function AdminLayout() {
         {/* User info + Logout (di bawah sidebar) */}
         <div className="absolute bottom-0 left-0 right-0 p-4 border-t border-gray-200">
           <div className="flex items-center gap-3 mb-3">
-            <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-              <span className="text-sm font-medium text-indigo-600">
+            <div className="w-8 h-8 bg-primary-100 rounded-full flex items-center justify-center">
+              <span className="text-sm font-medium text-primary-600">
                 {admin?.full_name?.charAt(0) || 'A'}
               </span>
             </div>

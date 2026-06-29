@@ -8,7 +8,7 @@ export default function NotFoundPage() {
         <p className="mt-4 text-lg text-gray-600">Halaman tidak ditemukan</p>
         <Link 
           to="/" 
-          className="mt-6 inline-block px-6 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+          className="mt-6 inline-block px-6 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
         >
           Kembali ke Beranda
         </Link>
