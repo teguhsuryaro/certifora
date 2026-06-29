@@ -64,3 +64,13 @@ export async function fetchTemplateByEventId(eventId: string) {
   if (error) throw error
   return data
 }
+
+export async function isTemplateReady(eventId: string): Promise<boolean> {
+  try {
+    const template = await fetchTemplateByEventId(eventId)
+    return !!(template && template.template_file_path)
+  } catch (error) {
+    console.error('Error checking template status:', error)
+    return false
+  }
+}

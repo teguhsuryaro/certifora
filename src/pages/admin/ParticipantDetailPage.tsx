@@ -12,6 +12,7 @@ export default function ParticipantDetailPage() {
 
   const [participant, setParticipant] = useState<any>(null)
   const [template, setTemplate] = useState<any>(null)
+  const [isTemplateReady, setIsTemplateReady] = useState(false)
   const [isLoading, setIsLoading] = useState(true)
   const [selfieModalOpen, setSelfieModalOpen] = useState(false)
 
@@ -36,12 +37,14 @@ export default function ParticipantDetailPage() {
   const loadData = async () => {
     setIsLoading(true)
     try {
-      const [pData, tData] = await Promise.all([
+      const [pData, tData, templateReady] = await Promise.all([
         participantService.fetchParticipantById(participantId!),
         templateService.fetchTemplateByEventId(eventId!),
+        templateService.isTemplateReady(eventId!),
       ])
       setParticipant(pData)
       setTemplate(tData)
+      setIsTemplateReady(templateReady)
 
       // Load existing overrides
       if (pData.template_overrides?.[0]) {
@@ -195,19 +198,25 @@ export default function ParticipantDetailPage() {
                 {sendMessage.text}
               </div>
             )}
-            <Button
-              variant={participant.delivery_status === 'failed' ? 'danger' : 'primary'}
-              className="w-full"
-              disabled={participant.delivery_status === 'success'}
-              isLoading={isSendingEmail}
-              onClick={handleSendCertificate}
-            >
-              {participant.delivery_status === 'success'
-                ? 'Sudah Terkirim'
-                : participant.delivery_status === 'failed'
-                ? 'Kirim Ulang'
-                : 'Kirim Sertifikat'}
-            </Button>
+            <div className="flex flex-col gap-1">
+              <Button
+                variant={participant.delivery_status === 'failed' ? 'danger' : 'primary'}
+                className="w-full"
+                disabled={participant.delivery_status === 'success' || !isTemplateReady}
+                isLoading={isSendingEmail}
+                onClick={handleSendCertificate}
+                title={!isTemplateReady ? "Harap upload dan atur template sertifikat terlebih dahulu" : ""}
+              >
+                {participant.delivery_status === 'success'
+                  ? 'Sudah Terkirim'
+                  : participant.delivery_status === 'failed'
+                  ? 'Kirim Ulang'
+                  : 'Kirim Sertifikat'}
+              </Button>
+              {!isTemplateReady && (
+                <span className="text-xs text-danger-500 font-medium text-center">Template belum siap</span>
+              )}
+            </div>
           </div>
         </div>
 

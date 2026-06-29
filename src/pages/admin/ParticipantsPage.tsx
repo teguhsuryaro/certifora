@@ -30,6 +30,7 @@ export default function ParticipantsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [searchQuery, setSearchQuery] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [isTemplateReady, setIsTemplateReady] = useState(false)
 
   const [confirmSendAll, setConfirmSendAll] = useState(false)
   const [isSending, setIsSending] = useState(false)
@@ -45,10 +46,14 @@ export default function ParticipantsPage() {
   const loadParticipants = async () => {
     setIsLoading(true)
     try {
-      const data = await participantService.fetchParticipants(eventId!)
+      const [data, templateReady] = await Promise.all([
+        participantService.fetchParticipants(eventId!),
+        templateService.isTemplateReady(eventId!)
+      ])
       setParticipants(data || [])
+      setIsTemplateReady(templateReady)
     } catch (error) {
-      console.error('Failed to load participants:', error)
+      console.error('Failed to load data:', error)
     } finally {
       setIsLoading(false)
     }
@@ -122,13 +127,19 @@ export default function ParticipantsPage() {
           </p>
         </div>
         <div>
-          <Button
-            variant="primary"
-            disabled={pendingCount === 0}
-            onClick={() => setConfirmSendAll(true)}
-          >
-            Kirim Semua ({pendingCount})
-          </Button>
+          <div className="flex flex-col items-end gap-1">
+            <Button
+              variant="primary"
+              disabled={pendingCount === 0 || !isTemplateReady}
+              onClick={() => setConfirmSendAll(true)}
+              title={!isTemplateReady ? "Harap upload dan atur template sertifikat terlebih dahulu" : ""}
+            >
+              Kirim Semua ({pendingCount})
+            </Button>
+            {!isTemplateReady && (
+              <span className="text-xs text-danger-500 font-medium">Template belum siap</span>
+            )}
+          </div>
         </div>
       </div>
 
