@@ -16,8 +16,9 @@ export async function renderPdfToImage(
   // Dynamic import pdfjs-dist
   const pdfjsLib = await import('pdfjs-dist')
   
-  // Set worker (gunakan CDN untuk simplicity)
-  pdfjsLib.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjsLib.version}/pdf.worker.min.mjs`
+  // Use local worker bundled by Vite
+  const workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString()
+  pdfjsLib.GlobalWorkerOptions.workerSrc = workerSrc
 
   const pdf = await pdfjsLib.getDocument(pdfUrl).promise
   const page = await pdf.getPage(1)

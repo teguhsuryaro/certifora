@@ -40,6 +40,7 @@ export default function TemplateEditorPage() {
   const [isSaving, setIsSaving] = useState(false)
   const [isUploading, setIsUploading] = useState(false)
   const [saveMessage, setSaveMessage] = useState<string | null>(null)
+  const [renderError, setRenderError] = useState<string | null>(null)
 
   // Editable settings (local state, saved on "Simpan")
   const [settings, setSettings] = useState({
@@ -78,10 +79,16 @@ export default function TemplateEditorPage() {
 
       // Render PDF preview
       if (data.template_file_path) {
-        const url = await templateService.getTemplateUrl(data.template_file_path)
-        const result = await renderPdfToImage(url, 1.5)
-        setPdfImage(result.dataUrl)
-        setPdfDimensions({ width: result.width, height: result.height })
+        try {
+          const url = await templateService.getTemplateUrl(data.template_file_path)
+          const result = await renderPdfToImage(url, 1.5)
+          setPdfImage(result.dataUrl)
+          setPdfDimensions({ width: result.width, height: result.height })
+          setRenderError(null)
+        } catch (renderErr: any) {
+          console.error('Failed to render PDF preview:', renderErr)
+          setRenderError('Gagal merender pratinjau PDF. File mungkin rusak atau ada masalah CORS.')
+        }
       }
     } catch (error) {
       console.error('Failed to load template:', error)
@@ -169,11 +176,25 @@ export default function TemplateEditorPage() {
       <div className="flex flex-col lg:flex-row gap-6">
         {/* === Kanvas Preview (70%) === */}
         <div className="lg:w-[70%]">
-          <div className="bg-white rounded-xl border border-neutral-200 p-4">
-            {pdfImage ? (
-              <div
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
+            <h2 className="text-lg font-semibold text-gray-900 mb-4">Pratinjau Sertifikat</h2>
+            
+            {!template?.template_file_path ? (
+              <div className="h-64 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center text-gray-500">
+                Belum ada template PDF. Silakan unggah di panel pengaturan.
+              </div>
+            ) : renderError ? (
+              <div className="h-64 border border-red-200 bg-red-50 rounded-lg flex flex-col items-center justify-center p-4 text-center">
+                <span className="text-red-500 mb-2">⚠️</span>
+                <p className="text-sm text-red-700">{renderError}</p>
+                <Button size="sm" className="mt-4" onClick={() => loadTemplate()}>
+                  Coba Lagi
+                </Button>
+              </div>
+            ) : (
+              <div 
                 ref={canvasContainerRef}
-                className="relative border border-neutral-200 rounded-lg overflow-hidden mx-auto"
+                className="relative border border-gray-300 shadow-inner bg-gray-50 overflow-hidden"
                 style={{
                   backgroundImage: `url(${pdfImage})`,
                   backgroundSize: 'contain',
@@ -217,16 +238,6 @@ export default function TemplateEditorPage() {
                   <span className="text-xs text-neutral-500">QR</span>
                 </div>
               </div>
-            ) : (
-              <FileUploadBox
-                accept=".pdf"
-                maxSizeMB={10}
-                onFileSelect={handleUploadTemplate}
-                label="Upload Template PDF"
-                hint="File PDF yang akan digunakan sebagai template sertifikat"
-                icon="document"
-                disabled={isUploading}
-              />
             )}
 
             {pdfImage && (
@@ -265,6 +276,20 @@ export default function TemplateEditorPage() {
         <div className="lg:w-[30%]">
           <div className="bg-white rounded-xl border border-neutral-200 p-6 lg:sticky lg:top-24 space-y-6">
             <h2 className="font-semibold text-neutral-900">Pengaturan</h2>
+
+            {!template?.template_file_path && (
+              <div className="mb-4">
+                <FileUploadBox
+                  accept=".pdf"
+                  maxSizeMB={10}
+                  onFileSelect={handleUploadTemplate}
+                  label="Upload Template PDF"
+                  hint="File PDF yang akan digunakan sebagai template sertifikat"
+                  icon="document"
+                  disabled={isUploading}
+                />
+              </div>
+            )}
 
             {/* Nama Peserta Settings */}
             <div className="space-y-4">
