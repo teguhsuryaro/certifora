@@ -61,9 +61,10 @@ export function SendProgressModal({ isOpen, onClose, progress }: SendProgressMod
 
         {/* Daily Limit Warning */}
         {progress.dailyLimitReached && (
-          <div className="p-4 bg-warning-50 border border-warning-200 rounded-lg">
-            <p className="text-sm text-warning-700">
-              ⚠️ <strong>Batas harian tercapai.</strong> Hari ini terkirim {progress.sent} dari{' '}
+          <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-3">
+            <AlertTriangle size={20} className="text-amber-500 shrink-0 mt-0.5" />
+            <p className="text-sm text-amber-800">
+              <strong>Batas harian tercapai.</strong> Hari ini terkirim {progress.sent} dari{' '}
               {progress.total} peserta. Sisanya ({progress.skipped} peserta) akan otomatis
               tersedia untuk dikirim besok karena keterbatasan kuota email harian gratis.
             </p>
@@ -72,9 +73,10 @@ export function SendProgressModal({ isOpen, onClose, progress }: SendProgressMod
 
         {/* Completion Messages */}
         {progress.isComplete && !progress.dailyLimitReached && (
-          <div className="p-4 bg-success-50 border border-success-200 rounded-lg text-center">
+          <div className="p-4 bg-success-50 border border-success-200 rounded-lg flex items-center justify-center gap-2">
+            <CheckCircle2 size={16} className="text-success-600 shrink-0" />
             <p className="text-sm text-success-700">
-              ✅ Semua sertifikat telah diproses!
+              Semua sertifikat telah diproses!
             </p>
           </div>
         )}

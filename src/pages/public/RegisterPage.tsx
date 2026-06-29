@@ -4,6 +4,7 @@ import { Button, Input, FileUploadBox } from '../../components/ui'
 import { compressSelfie } from '../../lib/image-compressor'
 import * as participantService from '../../services/participantService'
 import { ACCEPTED_IMAGE_TYPES, MAX_SELFIE_SIZE_MB } from '../../constants'
+import { CheckCircle2, AlertTriangle } from 'lucide-react'
 
 export default function RegisterPage() {
   const { eventId } = useParams<{ eventId: string }>()
@@ -121,9 +122,9 @@ export default function RegisterPage() {
     return (
       <div className="min-h-screen bg-neutral-50 flex items-center justify-center px-4">
         <div className="w-full max-w-md text-center">
-          <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8">
-            <span className="text-5xl block mb-4">✅</span>
-            <h2 className="text-xl font-bold text-neutral-900 mb-2">Pendaftaran Berhasil!</h2>
+          <div className="bg-success-50 border border-success-100 rounded-2xl p-8 text-center flex flex-col items-center">
+            <CheckCircle2 size={48} className="text-success-600 mb-4" />
+            <h2 className="text-2xl font-bold text-success-800 mb-2">Pendaftaran Berhasil!</h2>
             <p className="text-neutral-500 mb-6">
               Sertifikat akan dikirim ke email Anda setelah event berlangsung.
             </p>
@@ -213,10 +214,11 @@ export default function RegisterPage() {
             </div>
 
             {/* Peringatan */}
-            <div className="p-3 bg-warning-50 border border-warning-200 rounded-lg">
-              <p className="text-sm text-warning-700">
-                ⚠️ <strong>Pastikan nama sesuai identitas asli.</strong> Nama pada sertifikat
-                akan mengikuti data yang Anda masukkan.
+            <div className="p-3 bg-amber-50 text-amber-800 rounded-lg flex items-start gap-2">
+              <AlertTriangle size={16} className="shrink-0 mt-0.5 text-amber-600" />
+              <p className="text-sm">
+                <strong>Pastikan nama sesuai identitas asli.</strong> Nama pada sertifikat
+                akan dicetak persis seperti yang Anda masukkan.
               </p>
             </div>
 

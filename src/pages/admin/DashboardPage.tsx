@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useEventStore } from '../../stores/eventStore'
 import { getEmailQuota, type EmailQuota } from '../../services/emailQuotaService'
 import { Button, StatusBadge, EmptyState, PageLoading } from '../../components/ui'
+import { Calendar, Users, AlertTriangle, Building2 } from 'lucide-react'
 import type { EventStatus } from '../../types/database'
 
 // Helper: mapping status ke badge
@@ -158,11 +159,13 @@ export default function DashboardPage() {
 
                 {/* Event Info */}
                 <div className="space-y-1.5 text-sm text-neutral-500">
-                  <p>📅 {new Date(event.event_date).toLocaleDateString('id-ID', {
-                    day: 'numeric', month: 'long', year: 'numeric'
+                  <p className="flex items-center gap-1.5"><Calendar size={14} className="shrink-0" /> {new Date(event.event_date).toLocaleDateString('id-ID', {
+                    day: 'numeric',
+                    month: 'long',
+                    year: 'numeric'
                   })}</p>
-                  <p>🏢 {event.organizer}</p>
-                  <p>👥 {participantCount} peserta</p>
+                  <p className="flex items-center gap-1.5"><Building2 size={14} className="shrink-0" /> {event.organizer}</p>
+                  <p className="flex items-center gap-1.5"><Users size={14} className="shrink-0" /> {participantCount} peserta</p>
                 </div>
 
                 {/* Aksi Cepat */}
@@ -173,7 +176,7 @@ export default function DashboardPage() {
                       onClick={(e) => { e.preventDefault(); window.location.href = `/admin/events/${event.id}/template`; }}
                     >
                       <div className="flex items-start gap-1.5">
-                        <span className="text-amber-500 mt-0.5">⚠️</span>
+                      <AlertTriangle size={14} className="text-amber-500 shrink-0 mt-0.5" />
                         <span>
                           Template belum diatur. <span className="font-semibold underline cursor-pointer">Atur sekarang →</span>
                         </span>

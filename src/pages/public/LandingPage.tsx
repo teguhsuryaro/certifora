@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { Button } from '../../components/ui'
+import { Sparkles, ClipboardList, Palette, Smartphone, FileText, Mail, CheckCircle } from 'lucide-react'
 
 export default function LandingPage() {
   return (
@@ -20,7 +21,7 @@ export default function LandingPage() {
           <div className="text-center max-w-3xl mx-auto">
             {/* Badge */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-primary-50 border border-primary-200 rounded-full text-sm text-primary-700 font-medium mb-6">
-              <span>✨</span>
+              <Sparkles size={16} />
               100% Gratis Selamanya
             </div>
 
@@ -67,32 +68,32 @@ export default function LandingPage() {
           <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
             {[
               {
-                icon: '📋',
+                icon: <ClipboardList size={32} className="text-primary-600 mb-4" />,
                 title: 'Kelola Event',
                 desc: 'Buat event dengan QR code otomatis untuk registrasi peserta.',
               },
               {
-                icon: '🎨',
+                icon: <Palette size={32} className="text-primary-600 mb-4" />,
                 title: 'Template Sertifikat',
                 desc: 'Upload template PDF dan atur posisi nama & QR code dengan drag-and-drop.',
               },
               {
-                icon: '📱',
+                icon: <Smartphone size={32} className="text-primary-600 mb-4" />,
                 title: 'Registrasi QR Code',
                 desc: 'Peserta scan QR dan isi form registrasi langsung dari HP.',
               },
               {
-                icon: '📄',
+                icon: <FileText size={32} className="text-primary-600 mb-4" />,
                 title: 'Generate PDF',
                 desc: 'PDF sertifikat dibuat otomatis dengan nama peserta dan QR validasi.',
               },
               {
-                icon: '📧',
+                icon: <Mail size={32} className="text-primary-600 mb-4" />,
                 title: 'Kirim via Email',
                 desc: 'Kirim sertifikat langsung ke email peserta, satu per satu atau massal.',
               },
               {
-                icon: '✅',
+                icon: <CheckCircle size={32} className="text-primary-600 mb-4" />,
                 title: 'Validasi Online',
                 desc: 'Setiap sertifikat punya QR untuk verifikasi keaslian — aktif selamanya.',
               },
@@ -101,7 +102,7 @@ export default function LandingPage() {
                 key={i}
                 className="bg-neutral-50 rounded-2xl p-6 hover:shadow-card transition-shadow border border-neutral-100"
               >
-                <span className="text-3xl block mb-3">{feature.icon}</span>
+                {feature.icon}
                 <h4 className="text-lg font-semibold text-neutral-900 mb-2">{feature.title}</h4>
                 <p className="text-neutral-500 text-sm leading-relaxed">{feature.desc}</p>
               </div>

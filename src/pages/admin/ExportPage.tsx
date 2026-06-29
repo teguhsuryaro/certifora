@@ -4,6 +4,7 @@ import * as participantService from '../../services/participantService'
 import * as exportService from '../../services/exportService'
 import { supabase } from '../../lib/supabase'
 import { Button, PageLoading, StatusBadge } from '../../components/ui'
+import { FileSpreadsheet, FileText, ArrowLeft } from 'lucide-react'
 
 export default function ExportPage() {
   const { eventId } = useParams<{ eventId: string }>()
@@ -51,8 +52,8 @@ export default function ExportPage() {
     <div className="max-w-2xl">
       {/* Breadcrumb */}
       <nav className="text-sm text-neutral-500 mb-4">
-        <Link to={`/admin/events/${eventId}`} className="hover:text-primary-600">
-          ← Kembali ke Detail Event
+        <Link to={`/admin/events/${eventId}`} className="hover:text-primary-600 inline-flex items-center gap-1">
+          <ArrowLeft size={16} /> Kembali ke Detail Event
         </Link>
       </nav>
 
@@ -94,7 +95,7 @@ export default function ExportPage() {
             variant="secondary"
             onClick={handleExportExcel}
             disabled={participants.length === 0}
-            icon={<span>📊</span>}
+            icon={<FileSpreadsheet size={16} />}
           >
             Download
           </Button>
@@ -111,7 +112,7 @@ export default function ExportPage() {
             variant="secondary"
             onClick={handleExportPdf}
             disabled={participants.length === 0}
-            icon={<span>📄</span>}
+            icon={<FileText size={16} />}
           >
             Download
           </Button>

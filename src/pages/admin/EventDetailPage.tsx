@@ -6,6 +6,7 @@ import { Button, StatusBadge, ConfirmModal, PageLoading } from '../../components
 import { getEventRegistrationUrl } from '../../services/eventService'
 import type { EventStatus } from '../../types/database'
 import QRCode from 'qrcode'
+import { AlertTriangle, Palette, Users, FileDown } from 'lucide-react'
 
 // Helper: status badge mapping (reuable dari dashboard)
 function getStatusInfo(status: EventStatus) {
@@ -119,7 +120,7 @@ export default function EventDetailPage() {
       {(!event.certificate_templates?.[0]?.template_file_path) && (
         <div className="mb-6 bg-amber-50 border-l-4 border-amber-400 p-4 text-amber-800 rounded-r-lg shadow-sm">
           <div className="flex items-start gap-3">
-            <span className="text-amber-500 text-xl leading-none">⚠️</span>
+            <AlertTriangle size={24} className="text-amber-500 shrink-0" />
             <div>
               <p className="font-semibold text-sm">Template sertifikat belum diatur</p>
               <p className="text-xs mt-1 opacity-90">
@@ -143,7 +144,7 @@ export default function EventDetailPage() {
               to={`/admin/events/${eventId}/template`}
               className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-card hover:border-primary-300 transition-all"
             >
-              <span className="text-2xl mb-2 block">🎨</span>
+              <Palette size={24} className="mb-2 text-primary-600" />
               <h3 className="font-semibold text-neutral-900">Template Sertifikat</h3>
               <p className="text-sm text-neutral-500 mt-1">Atur template & posisi teks</p>
             </Link>
@@ -152,7 +153,7 @@ export default function EventDetailPage() {
               to={`/admin/events/${eventId}/participants`}
               className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-card hover:border-primary-300 transition-all"
             >
-              <span className="text-2xl mb-2 block">👥</span>
+              <Users size={24} className="mb-2 text-primary-600" />
               <h3 className="font-semibold text-neutral-900">Peserta</h3>
               <p className="text-sm text-neutral-500 mt-1">{participantCount} peserta terdaftar</p>
             </Link>

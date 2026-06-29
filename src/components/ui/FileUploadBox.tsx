@@ -1,4 +1,5 @@
 import { useRef, useState, type ChangeEvent } from 'react'
+import { FileUp, Camera, FileText } from 'lucide-react'
 
 interface FileUploadBoxProps {
   accept: string
@@ -58,8 +59,8 @@ export function FileUploadBox({
                 className="w-24 h-24 object-cover rounded-full mx-auto"
               />
             ) : (
-              <div className="w-16 h-16 bg-primary-100 rounded-xl flex items-center justify-center mx-auto">
-                <span className="text-2xl">📄</span>
+              <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                <FileUp size={24} className="text-neutral-400" />
               </div>
             )}
             <p className="text-sm text-primary-600 font-medium">Klik untuk ganti</p>
@@ -67,9 +68,9 @@ export function FileUploadBox({
         ) : (
           <div className="space-y-2">
             <div className="w-12 h-12 bg-neutral-100 rounded-xl flex items-center justify-center mx-auto">
-              <span className="text-xl">
-                {icon === 'camera' ? '📸' : '📁'}
-              </span>
+              <div className="text-neutral-400">
+                {icon === 'camera' ? <Camera size={24} /> : <FileUp size={24} />}
+              </div>
             </div>
             <p className="text-sm font-medium text-neutral-700">{label}</p>
             {hint && <p className="text-xs text-neutral-500">{hint}</p>}

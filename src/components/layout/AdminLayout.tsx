@@ -1,9 +1,10 @@
 import { useState } from 'react'
 import { Link, Outlet, useLocation, useNavigate } from 'react-router-dom'
 import { useAuthStore } from '../../stores/authStore'
+import { LayoutDashboard, Menu } from 'lucide-react'
 
 const navItems = [
-  { label: 'Dashboard', path: '/admin/dashboard', icon: '📊' },
+  { label: 'Dashboard', path: '/admin/dashboard', icon: LayoutDashboard },
 ]
 
 export function AdminLayout() {
@@ -58,7 +59,7 @@ export function AdminLayout() {
                 }
               `}
             >
-              <span>{item.icon}</span>
+              <item.icon size={20} />
               {item.label}
             </Link>
           ))}
@@ -99,9 +100,7 @@ export function AdminLayout() {
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden p-2 text-gray-600 hover:text-gray-900"
           >
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
+            <Menu size={24} />
           </button>
         </header>
 

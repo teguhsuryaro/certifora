@@ -4,6 +4,7 @@ import Draggable, { type DraggableEvent, type DraggableData } from 'react-dragga
 import { Button, FileUploadBox, PageLoading, Input, Select } from '../../components/ui'
 import * as templateService from '../../services/templateService'
 import { renderPdfToImage } from '../../lib/pdf-renderer'
+import { ArrowUpLeft, ArrowUpRight, ArrowDownLeft, ArrowDownRight, AlertCircle, Lightbulb } from 'lucide-react'
 import type { CertificateTemplate, QrPosition, TextFormat } from '../../types/database'
 
 // Font options (Google Fonts tersedia di /public/fonts/)
@@ -22,11 +23,11 @@ const FORMAT_OPTIONS = [
   { value: 'title_case', label: 'Title Case' },
 ]
 
-const QR_POSITIONS: { value: QrPosition; label: string; icon: string }[] = [
-  { value: 'top_left', label: 'Kiri Atas', icon: '◰' },
-  { value: 'top_right', label: 'Kanan Atas', icon: '◳' },
-  { value: 'bottom_left', label: 'Kiri Bawah', icon: '◱' },
-  { value: 'bottom_right', label: 'Kanan Bawah', icon: '◲' },
+const QR_POSITIONS: { value: QrPosition; label: string; icon: React.ReactNode }[] = [
+  { value: 'top_left', label: 'Kiri Atas', icon: <ArrowUpLeft size={16} /> },
+  { value: 'top_right', label: 'Kanan Atas', icon: <ArrowUpRight size={16} /> },
+  { value: 'bottom_left', label: 'Kiri Bawah', icon: <ArrowDownLeft size={16} /> },
+  { value: 'bottom_right', label: 'Kanan Bawah', icon: <ArrowDownRight size={16} /> },
 ]
 
 export default function TemplateEditorPage() {
@@ -87,7 +88,7 @@ export default function TemplateEditorPage() {
           setRenderError(null)
         } catch (renderErr: any) {
           console.error('Failed to render PDF preview:', renderErr)
-          setRenderError('Gagal merender pratinjau PDF. File mungkin rusak atau ada masalah CORS.')
+          setRenderError(`Error: ${renderErr?.message || String(renderErr)}`)
         }
       }
     } catch (error) {
@@ -184,9 +185,9 @@ export default function TemplateEditorPage() {
                 Belum ada template PDF. Silakan unggah di panel pengaturan.
               </div>
             ) : renderError ? (
-              <div className="h-64 border border-red-200 bg-red-50 rounded-lg flex flex-col items-center justify-center p-4 text-center">
-                <span className="text-red-500 mb-2">⚠️</span>
-                <p className="text-sm text-red-700">{renderError}</p>
+              <div className="flex flex-col items-center justify-center p-6 bg-red-50 rounded-xl border border-red-200">
+                <AlertCircle size={24} className="text-red-500 mb-2" />
+                <p className="text-sm font-medium text-red-800 text-center">{renderError}</p>
                 <Button size="sm" className="mt-4" onClick={() => loadTemplate()}>
                   Coba Lagi
                 </Button>
@@ -242,8 +243,9 @@ export default function TemplateEditorPage() {
 
             {pdfImage && (
               <div className="mt-3 flex justify-between items-center">
-                <p className="text-xs text-neutral-500">
-                  💡 Drag teks nama untuk mengatur posisi. Klik simpan setelah selesai.
+                <p className="text-xs text-neutral-500 flex items-center gap-1.5 mt-2 bg-neutral-50 p-2 rounded-lg border border-neutral-100">
+                  <Lightbulb size={14} className="text-amber-500 shrink-0" />
+                  Drag teks nama untuk mengatur posisi. Klik simpan setelah selesai.
                 </p>
                 <Button
                   variant="secondary"

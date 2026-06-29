@@ -7,6 +7,7 @@ import { getEmailQuota, type EmailQuota } from '../../services/emailQuotaService
 import { supabase } from '../../lib/supabase'
 import { Button, StatusBadge, EmptyState, PageLoading, Input, ConfirmModal } from '../../components/ui'
 import { SendProgressModal } from '../../components/shared/SendProgressModal'
+import { Users, AlertTriangle } from 'lucide-react'
 import type { DeliveryStatus } from '../../types/database'
 
 function getDeliveryBadge(status: DeliveryStatus) {
@@ -183,7 +184,7 @@ export default function ParticipantsPage() {
       {/* Empty State */}
       {filteredParticipants.length === 0 ? (
         <EmptyState
-          icon="👥"
+          icon={<Users size={48} className="text-neutral-300" />}
           title="Belum ada peserta"
           description={
             participants.length === 0
@@ -302,8 +303,11 @@ export default function ParticipantsPage() {
           <div className="space-y-2">
             <p>Akan mengirim sertifikat ke {pendingCount} peserta yang belum terkirim. Estimasi waktu: ~{Math.ceil((pendingCount * 2) / 60)} menit.</p>
             {quota && (quota.dailyLimit - quota.dailySent < pendingCount) && (
-              <p className="text-danger-600 font-medium text-sm p-3 bg-danger-50 rounded-lg">
-                ⚠️ Peringatan: Sisa kuota email harian Anda ({Math.max(0, quota.dailyLimit - quota.dailySent)}) lebih kecil dari jumlah peserta ({pendingCount}). Sebagian pengiriman akan gagal.
+              <p className="text-danger-600 font-medium text-sm p-3 bg-danger-50 rounded-lg flex items-start gap-2">
+                <AlertTriangle size={16} className="shrink-0 mt-0.5" />
+                <span>
+                  <strong>Peringatan:</strong> Sisa kuota email harian Anda ({Math.max(0, quota.dailyLimit - quota.dailySent)}) lebih kecil dari jumlah peserta ({pendingCount}). Sebagian pengiriman akan gagal.
+                </span>
               </p>
             )}
           </div>

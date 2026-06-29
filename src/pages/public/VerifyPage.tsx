@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { CheckCircle2, XCircle } from 'lucide-react'
 import { supabase } from '../../lib/supabase'
 
 interface VerificationData {
@@ -78,16 +79,16 @@ export default function VerifyPage() {
         <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 overflow-hidden">
           {/* Status Header */}
           {data?.isValid ? (
-            <div className="bg-success-50 border-b border-success-100 p-6 text-center">
-              <span className="text-5xl block mb-3">✅</span>
+            <div className="bg-success-50 border-b border-success-100 p-6 text-center flex flex-col items-center">
+              <CheckCircle2 size={48} className="text-success-600 mb-3" />
               <h1 className="text-xl font-bold text-success-700">Sertifikat Valid</h1>
               <p className="text-sm text-success-600 mt-1">
                 Sertifikat ini terdaftar dan terverifikasi
               </p>
             </div>
           ) : (
-            <div className="bg-danger-50 border-b border-danger-100 p-6 text-center">
-              <span className="text-5xl block mb-3">❌</span>
+            <div className="bg-danger-50 border-b border-danger-100 p-6 text-center flex flex-col items-center">
+              <XCircle size={48} className="text-danger-600 mb-3" />
               <h1 className="text-xl font-bold text-danger-700">Sertifikat Tidak Ditemukan</h1>
               <p className="text-sm text-danger-600 mt-1">
                 Kode sertifikat "{kodeSertifikat}" tidak ditemukan dalam sistem
