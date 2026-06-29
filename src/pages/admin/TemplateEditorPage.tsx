@@ -238,7 +238,7 @@ export default function TemplateEditorPage() {
                   >
                     <div
                       ref={nameRef}
-                      className="absolute cursor-move border-[1.5px] border-dashed border-primary-500 bg-primary-50/70 px-3 py-1.5 rounded-md select-none hover:bg-primary-50 transition-colors shadow-sm"
+                      className="absolute top-0 left-0 cursor-move border-[1.5px] border-dashed border-primary-500 bg-primary-50/70 px-3 py-1.5 rounded-md select-none hover:bg-primary-50 transition-colors shadow-sm"
                       style={{
                         fontSize: `${settings.name_font_size * 0.8}px`,
                         color: settings.name_font_color,
