@@ -330,6 +330,7 @@ export default function EventDetailPage() {
                     icon={<Send size={18} />} 
                     disabled={!isTemplateReady || participantCount === 0}
                     className="w-full sm:w-auto"
+                    onClick={() => navigate(`/admin/events/${eventId}/participants`)}
                   >
                     Kirim Semua Sertifikat
                   </Button>

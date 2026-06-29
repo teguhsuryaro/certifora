@@ -13,21 +13,24 @@ interface SendProgress {
 interface SendProgressModalProps {
   isOpen: boolean
   onClose: () => void
+  onCancel?: () => void
   progress: SendProgress
 }
 
-export function SendProgressModal({ isOpen, onClose, progress }: SendProgressModalProps) {
-  const canClose = progress.isComplete
+export function SendProgressModal({ isOpen, onClose, onCancel, progress }: SendProgressModalProps) {
+  const canClose = progress.isComplete || progress.dailyLimitReached
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={canClose ? onClose : () => {}}
-      title={progress.isComplete ? 'Pengiriman Selesai' : 'Mengirim Sertifikat...'}
+      onClose={canClose ? onClose : (onCancel || (() => {}))}
+      title={canClose ? 'Pengiriman Selesai' : 'Mengirim Sertifikat...'}
       size="md"
       footer={
         canClose ? (
           <Button onClick={onClose}>Tutup</Button>
+        ) : onCancel ? (
+          <Button variant="danger" onClick={onCancel}>Batalkan</Button>
         ) : undefined
       }
     >

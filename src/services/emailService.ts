@@ -98,7 +98,8 @@ export async function sendAllCertificates(
   emailSettings: EventEmailSettings,
   eventName: string,
   organizer: string,
-  onProgress: ProgressCallback
+  onProgress: ProgressCallback,
+  signal?: AbortSignal
 ): Promise<SendResult[]> {
   const pendingParticipants = participants.filter(p => p.delivery_status !== 'success')
   const results: SendResult[] = []
@@ -143,6 +144,11 @@ export async function sendAllCertificates(
 
   // Kirim satu per satu
   for (const participant of pendingParticipants) {
+    if (signal?.aborted) {
+      progress.skipped += pendingParticipants.length - progress.sent - progress.failed
+      break
+    }
+
     if (remainingQuota <= 0) {
       progress.dailyLimitReached = true
       progress.skipped += pendingParticipants.length - progress.sent - progress.failed

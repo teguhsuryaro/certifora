@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import * as participantService from '../../services/participantService'
 import * as emailService from '../../services/emailService'
@@ -44,6 +44,8 @@ export default function ParticipantsPage() {
     total: 0, sent: 0, failed: 0, skipped: 0,
     currentName: '', isComplete: false, dailyLimitReached: false,
   })
+
+  const abortControllerRef = useRef<AbortController | null>(null)
 
   useEffect(() => {
     if (eventId) loadParticipants()
@@ -140,6 +142,8 @@ export default function ParticipantsPage() {
       return
     }
 
+    abortControllerRef.current = new AbortController()
+
     try {
       const [template, { data: eventData }] = await Promise.all([
         templateService.fetchTemplateByEventId(eventId!),
@@ -156,12 +160,26 @@ export default function ParticipantsPage() {
         emailSettings,
         eventData.name,
         eventData.organizer,
-        (progress) => setSendProgress(progress)
+        (progress) => setSendProgress(progress),
+        abortControllerRef.current.signal
       )
 
       await loadParticipants()
     } catch (error) {
       console.error('Batch send error:', error)
+    } finally {
+      abortControllerRef.current = null
+    }
+  }
+
+  const handleCancelSend = () => {
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort()
+      setSendProgress(prev => ({
+        ...prev,
+        isComplete: true,
+        currentName: 'Dibatalkan oleh pengguna'
+      }))
     }
   }
 
@@ -476,6 +494,7 @@ export default function ParticipantsPage() {
           setIsSending(false)
           loadParticipants()
         }}
+        onCancel={handleCancelSend}
         progress={sendProgress}
       />
     </div>
