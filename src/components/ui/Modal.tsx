@@ -39,14 +39,14 @@ export function Modal({ isOpen, onClose, title, children, footer, size = 'md' }:
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       {/* Backdrop */}
       <div
-        className="absolute inset-0 bg-black/50 transition-opacity"
+        className="absolute inset-0 bg-black/50 backdrop-blur-sm transition-opacity"
         onClick={onClose}
       />
 
       {/* Modal content */}
       <div
         className={`
-          relative bg-white rounded-xl shadow-modal w-full ${sizeClasses[size]}
+          relative bg-white/90 backdrop-blur-lg rounded-2xl shadow-xl w-full ${sizeClasses[size]}
           animate-in fade-in zoom-in-95 duration-200
         `}
       >

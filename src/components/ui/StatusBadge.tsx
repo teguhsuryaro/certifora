@@ -20,10 +20,11 @@ export function StatusBadge({ variant, children, className = '' }: StatusBadgePr
   return (
     <span
       className={`
-        inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+        inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium
         border ${variantClasses[variant]} ${className}
       `}
     >
+      <span className="w-1.5 h-1.5 rounded-full bg-current opacity-75" />
       {children}
     </span>
   )

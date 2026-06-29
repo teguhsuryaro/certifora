@@ -25,10 +25,10 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(
           ref={ref}
           id={id}
           className={`
-            w-full px-4 py-2.5 border rounded-lg outline-none transition-all text-sm bg-white
+            w-full px-4 py-2.5 border rounded-xl outline-none transition-all text-sm bg-white/60 backdrop-blur-sm
             ${error
-              ? 'border-danger-300 focus:ring-2 focus:ring-danger-500'
-              : 'border-neutral-300 focus:ring-2 focus:ring-primary-500'
+              ? 'border-danger-500 focus:ring-4 focus:ring-danger-500/20 focus:border-danger-500'
+              : 'border-neutral-200 focus:ring-4 focus:ring-primary-500/20 focus:border-primary-500 hover:border-neutral-300 hover:bg-white/80'
             }
             ${className}
           `}
